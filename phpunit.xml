@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<phpunit bootstrap="test/phpunit.php"
+         beStrictAboutTestsThatDoNotTestAnything="true"
+         beStrictAboutChangesToGlobalState="true"
+         colors="true"
+         coverage-text="true"
+         beStrictAboutOutputDuringTests="true"
+         forceCoversAnnotation="true"
+         mapTestClassNameToCoveredClassName="true"
+         verbose="true">
+    <testsuites>
+        <testsuite name="All">
+            <directory phpVersion="7.0" phpVersionOperator=">=">test</directory>
+        </testsuite>
+    </testsuites>
+    <filter>
+        <blacklist>
+            <directory>.</directory>
+        </blacklist>
+        <whitelist>
+            <directory suffix=".php">src</directory>
+        </whitelist>
+    </filter>
+    <logging>
+        <log type="coverage-text" target="php://stdout" showUncoveredFiles="false" />
+        <log type="coverage-clover" target=".phpunit/coverage.xml" />
+    </logging>
+</phpunit>

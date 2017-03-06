@@ -1,0 +1,27 @@
+{
+    "autoload": {
+        "psr-4": {
+            "Whip\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Whip\\Tests\\": "test/Whip"
+        }
+    },
+    "description": "Whip web tools.",
+    "name": "kshabazz/whip",
+    "require": {
+        "kshabazz/slib": "dev-master",
+        "php": ">=7.0",
+        "psr/log": "^1.0",
+        "psr/http-message": "^1.0",
+        "siriusphp/upload": "^2.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^6.0"
+    },
+    "scripts": {
+        "units": "phpunit"
+    }
+}
