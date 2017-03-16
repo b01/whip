@@ -2,6 +2,7 @@
 
 use Whip\AccountManager;
 use Whip\AccountStorage;
+use Whip\Tests\Mocks\MockAccountManager;
 
 /**
  * Class AccountManagerTest
@@ -20,7 +21,7 @@ class AccountManagerTest extends \PHPUnit\Framework\TestCase
     public function setUp()
     {
         $this->mockAccountStorage = $this->createMock(AccountStorage::class);
-        $this->accountManager = $this->createMock(AccountManager::class);
+        $this->accountManager = new MockAccountManager();
     }
 
     /**
@@ -45,21 +46,25 @@ class AccountManagerTest extends \PHPUnit\Framework\TestCase
 
         $actual = $this->accountManager->login($this->mockAccountStorage, 'test', '1234');
 
-//        $actual = (string) \serialize($this->accountManager);
-
-        $this->assertEquals('', $actual);
+        $this->assertEquals(101, strlen($actual));
     }
 
 
      /**
-      * @covers ::isValid
+      * @covers ::isLoggedIn
       * @uses \Whip\AccountManager::__construct
       * @uses \Whip\AccountManager::login
       */
      public function testWillCheckIfAnAccountIsValid()
      {
+         $this->mockAccountStorage->expects($this->once())
+             ->method('lookup')
+             ->with('test', '1234')
+             ->willReturn(true);
+
          $this->accountManager->login($this->mockAccountStorage, 'test', '1234');
-         $actual = $this->accountManager->isValid();
+
+         $actual = $this->accountManager->isLoggedIn();
 
          $this->assertTrue($actual);
      }
@@ -71,9 +76,35 @@ class AccountManagerTest extends \PHPUnit\Framework\TestCase
      */
     public function testWillSerialize()
     {
-        $this->accountManager->login($this->mockAccountStorage, 'test', '');
+        $this->mockAccountStorage->expects($this->once())
+            ->method('lookup')
+            ->with('test', '1234')
+            ->willReturn(true);
+
+        $this->accountManager->login($this->mockAccountStorage, 'test', '1234');
+
         $actual = (string) \serialize($this->accountManager);
 
-        $this->assertContains('a:1:{i:0;s:4:"test";', $actual);
+        $this->assertEquals(219, strlen($actual));
+    }
+
+    /**
+     * @covers ::__wakeup
+     * @uses \Whip\AccountManager::__construct
+     * @uses \Whip\AccountManager::login
+     */
+    public function testWillUnserialize()
+    {
+        $this->mockAccountStorage->expects($this->once())
+            ->method('lookup')
+            ->with('test', '1234')
+            ->willReturn(true);
+
+        $this->accountManager->login($this->mockAccountStorage, 'test', '1234');
+
+        $serialized = \serialize($this->accountManager);
+        $actual = \unserialize($serialized);
+
+        $this->assertTrue($actual->isLoggedIn());
     }
 }

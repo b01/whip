@@ -1,19 +1,18 @@
 <?php namespace Whip;
 
 use Kshabazz\Slib\Tools\Utilities;
-use Serializable;
 
 /**
  * Class Account
  *
  * @package \Whip
  */
-abstract class AccountManager implements Serializable
+abstract class AccountManager
 {
     use Utilities;
 
     /** @var array|null Account information. */
-    private $account;
+    protected $account;
 
     /**
      * Login constructor.
@@ -28,18 +27,16 @@ abstract class AccountManager implements Serializable
      *
      * @return array
      */
-    public function serialize()
+    public function __sleep()
     {
-        return $this->serialize($this->account);
+        return ['account'];
     }
 
     /**
-     *
-     * @param string $serialized
+     * Perform action to restore to previous state.
      */
-    public function unserialize($serialized)
+    public function __wakeup()
     {
-        $this->account = $this->unserialize($serialized);
     }
 
     /**
@@ -47,9 +44,9 @@ abstract class AccountManager implements Serializable
      *
      * @return bool
      */
-    public function isValid()
+    public function isLoggedIn()
     {
-        return !empty($this->account);
+        return array_key_exists('username', $this->account);
     }
 
     /**
@@ -60,17 +57,20 @@ abstract class AccountManager implements Serializable
      */
     public function login(AccountStorage $accountStorage, $username, $password)
     {
-        $account = $accountStorage->lookup($username, $password);
+        $accountFound = $accountStorage->lookup($username, $password);
         $accountToken = null;
 
-        if ($account) {
+        if ($accountFound) {
             // TODO: generate a hash that can be stored in the DB.
-            // Tie the hash to this computer somehow.
-             $accountToken = \Sodium\crypto_pwhash_scryptsalsa208sha256_str(
+            $accountToken = \Sodium\crypto_pwhash_scryptsalsa208sha256_str(
                  $password,
                  \Sodium\CRYPTO_PWHASH_SCRYPTSALSA208SHA256_OPSLIMIT_INTERACTIVE,
                  \Sodium\CRYPTO_PWHASH_SCRYPTSALSA208SHA256_MEMLIMIT_INTERACTIVE
              );
+
+            // TODO: Set the hash to a secure cookie to tie it to a browser on a computer.
+            $this->account['username'] = $username;
+            $this->account['token'] = $accountToken;
         }
 
         return $accountToken;
