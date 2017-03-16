@@ -51,17 +51,13 @@ abstract class FormService
      */
     public function getScrubbedInput(ServerRequestInterface $request)
     {
-        $method = $request->getMethod();
-        $requestVars = [];
+        $get = $request->getQueryParams();
+        $getVars = filter_input_array(\INPUT_GET, $get);
 
-        if ($method === 'GET') {
-            $requestVars = $request->getQueryParams();
-        }
+        $post = $request->getParsedBody();
+        $postVars = \is_array($post) ? filter_input_array(\INPUT_POST, $post) : [];
 
-        if ($method === 'POST') {
-            $post = $request->getParsedBody();
-            $requestVars = \is_array($post) ? $post : [];
-        }
+        $requestVars = \array_merge($getVars, $postVars);
 
         return $requestVars;
     }

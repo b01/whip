@@ -1,7 +1,5 @@
 <?php namespace Whip;
 
-use Kshabazz\Slib\Tools\Utilities;
-
 /**
  * Class View
  *
@@ -9,19 +7,10 @@ use Kshabazz\Slib\Tools\Utilities;
  */
 abstract class View
 {
-    use Utilities;
-
-    /** @var array render data. */
     protected $data;
 
-    /** @var array of \Whip\Form */
-    protected $forms;
-
-    /** @var array Query string data when present in the request. */
-    protected $queryString;
-
-    /** @var array POST method data when present in the request. */
-    protected $postBody;
+    /** @var \Whip\Renderer */
+    protected $renderer;
 
     /**
      * View constructor.
@@ -45,11 +34,11 @@ abstract class View
      * Add placeholder data to the view.
      *
      * @param array $data Must be a single dimension array.
-     * @return $this
+     * @return \Whip\View
      */
     public function addData($key, array $data)
     {
-        $this->data[$key] = array_merge($this->cleanArray($data));
+        $this->data[$key] = array_merge($data);
 
         return $this;
     }
@@ -63,40 +52,7 @@ abstract class View
     {
         $this->renderer->withTemplate($this->getTemplateFile());
 
-        $data = $this->getData();
-
         return $this->renderer->render($data);
-    }
-
-    /**
-     * Add a form to the page.
-     *
-     *  Multiple forms can be added.
-     * @param \Whip\Form $form
-     * @return $this
-     */
-    public function addForm(Form $form)
-    {
-        $this->forms[] = $form;
-
-        return $this;
-    }
-
-    /**
-     * Get data to fill in placeholders.
-     *
-     * @return array
-     */
-    protected function getData()
-    {
-        // Append any form input and errors to the placeholder data.
-        if (is_array($this->forms) && count($this->forms) > 0) {
-            foreach($this->forms as $key => $form) {
-                $this->data['form'][$key] = $form->getRenderData();
-            }
-        }
-
-        return $this->data;
     }
 
     /**

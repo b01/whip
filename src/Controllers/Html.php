@@ -15,19 +15,29 @@ use Psr\Http\Message\ServerRequestInterface;
  *
  * @package \Whip\Controllers
  */
-class Html
+abstract class Html
 {
-    /** @var \Whip\FormService */
-    private $formService;
 
-    /** @var \Whip\View */
-    private $view;
+    /** @var array of \Whip\Form */
+    protected $forms;
+
+    /** @var \Whip\FormService */
+    protected $formService;
+
+    /** @var array Query string data when present in the request. */
+    protected $queryString;
+
+    /** @var array POST method data when present in the request. */
+    protected $postBody;
 
     /** @var \Psr\Http\Message\ServerRequestInterface */
-    private $request;
+    protected $request;
 
     /** @var \Psr\Http\Message\ResponseInterface */
-    private $response;
+    protected $response;
+
+    /** @var \Whip\View */
+    protected $view;
 
     /**
      * Html constructor.
@@ -50,17 +60,12 @@ class Html
     }
 
     /**
-     * Will perform a redirect when does not pass all checks put in place.
+     * Will perform a redirect under certain conditions.
      *
      * @param string $url
-     * @param callable $hasMetRequirements
+     * @param callable $metConditions
      */
-    public function redirectOnCheck(string $url, callable $hasMetRequirements)
-    {
-        if (!$hasMetRequirements) {
-            $this->response->withRedirect($url);
-        }
-    }
+    abstract public function shouldRedirect(string $url);
 
     /**
      * Render the HTML.
@@ -69,10 +74,48 @@ class Html
      */
     public function render()
     {
+        // Add POST body and query params to the view.
+        $this->view->addData('post', $this->request->getParsedBody())
+            ->addData('query', $this->request->getQueryParams())
+            ->addData('form', $this->getFormData());
+
         $output = $this->view->render();
 
         $this->response->getBody()->write($output);
 
         return $this->response;
+    }
+
+    /**
+     * Add a form to the page.
+     *
+     *  Multiple forms can be added.
+     * @param \Whip\Form $form
+     * @return $this
+     */
+    public function addForm($key, Form $form)
+    {
+        $this->formService->addForm($key, $form);
+
+        return $this;
+    }
+
+    /**
+     * Get data to fill in placeholders.
+     *
+     * @return array
+     */
+    protected function getFormData()
+    {
+        $formData = [];
+
+        // Append any form input and errors to the placeholder data.
+        if (is_array($this->forms) && count($this->forms) > 0) {
+            foreach($this->forms as $key => $form) {
+                $formData['form.'][$key] = $form->getRenderData();
+            }
+        }
+
+        return $formData;
     }
 }

@@ -15,11 +15,11 @@ interface Form
     public function canSubmit();
 
     /**
-     * Clean the request variables by filtering each field, at least, through htmlspecialchars.
+     * Get a unique name for this form.
      *
-     * @param array $requestVars
+     * @return mixed
      */
-    public function setInput(array $requestVars);
+    public function getName();
 
     /**
      * Get data to pass to the template engine to aid rendering. For example, field value and errors.
@@ -27,6 +27,13 @@ interface Form
      * @return array
      */
     public function getRenderData();
+
+    /**
+     * Clean the request variables by filtering each field, at least, through htmlspecialchars.
+     *
+     * @param array $requestVars
+     */
+    public function setInput(array $requestVars);
 
     /**
      * Perform the submission.
