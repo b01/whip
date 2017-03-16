@@ -1,13 +1,14 @@
 <?php namespace Whip;
 
 use Kshabazz\Slib\Tools\Utilities;
+use Serializable;
 
 /**
  * Class Account
  *
  * @package \Whip
  */
-abstract class AccountManager
+abstract class AccountManager implements Serializable
 {
     use Utilities;
 
@@ -27,9 +28,18 @@ abstract class AccountManager
      *
      * @return array
      */
-    public function __sleep()
+    public function serialize()
     {
-        return ['account'];
+        return $this->serialize($this->account);
+    }
+
+    /**
+     *
+     * @param string $serialized
+     */
+    public function unserialize($serialized)
+    {
+        $this->account = $this->unserialize($serialized);
     }
 
     /**
@@ -50,12 +60,19 @@ abstract class AccountManager
      */
     public function login(AccountStorage $accountStorage, $username, $password)
     {
-        // TODO: Implement.
         $account = $accountStorage->lookup($username, $password);
+        $accountToken = null;
 
         if ($account) {
-            // TODO: Look into using LibSodium
-            // $accountToken = \Sodium\crypto_generichash(string $msg, string $key = null, string $length = 32)
+            // TODO: generate a hash that can be stored in the DB.
+            // Tie the hash to this computer somehow.
+             $accountToken = \Sodium\crypto_pwhash_scryptsalsa208sha256_str(
+                 $password,
+                 \Sodium\CRYPTO_PWHASH_SCRYPTSALSA208SHA256_OPSLIMIT_INTERACTIVE,
+                 \Sodium\CRYPTO_PWHASH_SCRYPTSALSA208SHA256_MEMLIMIT_INTERACTIVE
+             );
         }
+
+        return $accountToken;
     }
 }

@@ -14,6 +14,9 @@ class AccountManagerTest extends \PHPUnit\Framework\TestCase
     /** @var \Whip\AccountManager|\PHPUnit_Framework_MockObject_MockObject */
     private $accountManager;
 
+    /** @var \Whip\AccountStorage|\PHPUnit_Framework_MockObject_MockObject */
+    private $mockAccountStorage;
+
     public function setUp()
     {
         $this->mockAccountStorage = $this->createMock(AccountStorage::class);
@@ -33,11 +36,16 @@ class AccountManagerTest extends \PHPUnit\Framework\TestCase
      * @covers ::login
      * @uses \Whip\AccountManager::__construct
      */
-    public function testWillSuccessfullySetAnAccount()
+    public function testWillSuccessfullyLogin()
     {
-        $this->accountManager->login($this->mockAccountStorage, 'test', '1234');
+        $this->mockAccountStorage->expects($this->once())
+            ->method('lookup')
+            ->with('test', '1234')
+            ->willReturn(true);
 
-        $actual = (string) \serialize($this->accountManager);
+        $actual = $this->accountManager->login($this->mockAccountStorage, 'test', '1234');
+
+//        $actual = (string) \serialize($this->accountManager);
 
         $this->assertEquals('', $actual);
     }
@@ -51,10 +59,10 @@ class AccountManagerTest extends \PHPUnit\Framework\TestCase
      public function testWillCheckIfAnAccountIsValid()
      {
          $this->accountManager->login($this->mockAccountStorage, 'test', '1234');
-        $actual = $this->accountManager->isValid();
+         $actual = $this->accountManager->isValid();
 
-        $this->assertTrue($actual);
-    }
+         $this->assertTrue($actual);
+     }
 
     /**
      * @covers ::__sleep

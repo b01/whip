@@ -5,9 +5,7 @@
  * specific to a page, then do that in the view.
  */
 
-use Whip\AccountManager;
 use Whip\FormService;
-use Whip\Renderer;
 use Whip\View;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -19,14 +17,11 @@ use Psr\Http\Message\ServerRequestInterface;
  */
 class Html
 {
-    /** @var \Whip\AccountManager */
-    private $account;
+    /** @var \Whip\FormService */
+    private $formService;
 
-    /** @var string URL. */
-    private $redirectUrl;
-
-    /** @var \Whip\Renderer */
-    private $renderer;
+    /** @var \Whip\View */
+    private $view;
 
     /** @var \Psr\Http\Message\ServerRequestInterface */
     private $request;
@@ -37,64 +32,46 @@ class Html
     /**
      * Html constructor.
      *
-     * @param \Psr\Http\Message\ServerRequestInterface $request
-     * @param \Psr\Http\Message\ResponseInterface $response
-     * @param \Whip\Renderer $renderer
-     * @param \Whip\Account $account
+     * @param ServerRequestInterface $request
+     * @param ResponseInterface $response
+     * @param View $view
+     * @param FormService|null $formService
      */
     public function __construct(
         ServerRequestInterface $request,
         ResponseInterface $response,
-        Renderer $renderer,
-        FormService $formService,
-        Account $account
+        View $view,
+        FormService $formService = null
     ) {
         $this->request = $request;
         $this->response = $response;
-        $this->renderer = $renderer;
-        $this->account = $account;
+        $this->view = $view;
+        $this->formService = $formService;
     }
 
     /**
-     * Redirect when the client is not logged.
+     * Will perform a redirect when does not pass all checks put in place.
      *
-     * @param string $url Place to redirect to.
+     * @param string $url
+     * @param callable $hasMetRequirements
      */
-    public function setRedirectUrl(string $url)
+    public function redirectOnCheck(string $url, callable $hasMetRequirements)
     {
-        $this->redirectUrl = $url;
-    }
-
-    /**
-     * Render the HTML.
-     *
-     * @param string $template
-     * @param array & $data
-     * @return \Psr\Http\Message\ResponseInterface
-     */
-    public function render(string $template, array & $data = [])
-    {
-        if (!$this->account->isValid() && \is_string($this->redirectUrl)) {
-            $this->response->withRedirect($this->redirectUrl);
-        } else {
-            $this->renderer->withTemplate($template);
-            $output = $this->renderer->render($data);
-            $this->response->getBody()->write($output);
+        if (!$hasMetRequirements) {
+            $this->response->withRedirect($url);
         }
-
-        return $this->response;
     }
 
     /**
      * Render the HTML.
      *
-     * @param \Whip\View $view
      * @return \Psr\Http\Message\ResponseInterface
      */
-    public function renderView(View $view)
+    public function render()
     {
-        $data = $view->getRenderData($this->request);
-        $this->render($view->getTemplate(), $data);
+        $output = $this->view->render();
+
+        $this->response->getBody()->write($output);
 
         return $this->response;
     }

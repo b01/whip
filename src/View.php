@@ -1,8 +1,6 @@
-<?php namespace Whip\Views;
+<?php namespace Whip;
 
-use Whip\Form;
 use Kshabazz\Slib\Tools\Utilities;
-use Whip\Renderer;
 
 /**
  * Class View

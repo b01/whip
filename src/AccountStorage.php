@@ -7,5 +7,13 @@
  */
 interface AccountStorage
 {
-    public function lookup(AccountStorage $accountStorage, $username, $password);
+    /**
+     * Lookup an account in the storage facility.
+     *
+     * @param AccountStorage $accountStorage
+     * @param string $username
+     * @param string $password
+     * @return boolean
+     */
+    public function lookup(AccountStorage $accountStorage, string $username, string $password);
 }
