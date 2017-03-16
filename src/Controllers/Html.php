@@ -5,6 +5,7 @@
  * specific to a page, then do that in the view.
  */
 
+use Whip\Form;
 use Whip\FormService;
 use Whip\View;
 use Psr\Http\Message\ResponseInterface;
