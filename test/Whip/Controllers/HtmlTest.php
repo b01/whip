@@ -46,4 +46,34 @@ class HtmlTest extends TestCase
     {
         $this->assertInstanceOf(Html::class, $this->htmlController);
     }
+
+    /**
+     * @covers ::render
+     */
+    public function testCanRender()
+    {
+        $this->mockRequest->expects($this->once())
+            ->method('getParsedBody')
+            ->willReturn([]);
+
+        $this->mockRequest->expects($this->once())
+            ->method('getQueryParams')
+            ->willReturn([]);
+
+        $this->mockView->expects($this->any())
+            ->method('addData')
+            ->willReturn('test');
+
+        $this->mockView->method('render')
+            ->willReturn('test');
+
+        $this->mockResponse->expects($this->once())
+            ->method('withBody')
+            ->willReturn($this->mockResponse);
+
+
+        $actual = $this->htmlController->render();
+
+        $this->assertEquals($this->mockResponse, $actual);
+    }
 }

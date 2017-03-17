@@ -1,5 +1,6 @@
 <?php namespace Whip;
 
+use Kshabazz\Slib\Tools\Utilities;
 use Psr\Http\Message\ServerRequestInterface;
 
 /**
@@ -11,6 +12,8 @@ use Psr\Http\Message\ServerRequestInterface;
  */
 abstract class FormService
 {
+    use Utilities;
+
     /** @var string */
     private $formSubmitField;
 
@@ -52,10 +55,10 @@ abstract class FormService
     public function getScrubbedInput(ServerRequestInterface $request)
     {
         $get = $request->getQueryParams();
-        $getVars = filter_input_array(\INPUT_GET, $get);
+        $getVars = $this->cleanArray($get);
 
         $post = $request->getParsedBody();
-        $postVars = \is_array($post) ? filter_input_array(\INPUT_POST, $post) : [];
+        $postVars = \is_array($post) ? $this->cleanArray($post) : [];
 
         $requestVars = \array_merge($getVars, $postVars);
 

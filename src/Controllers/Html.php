@@ -5,6 +5,8 @@
  * specific to a page, then do that in the view.
  */
 
+use Kshabazz\Slib\StringStream;
+use Kshabazz\Slib\Tools\Utilities;
 use Whip\Form;
 use Whip\FormService;
 use Whip\View;
@@ -18,6 +20,7 @@ use Psr\Http\Message\ServerRequestInterface;
  */
 abstract class Html
 {
+    use Utilities;
 
     /** @var array of \Whip\Form */
     protected $forms;
@@ -75,14 +78,21 @@ abstract class Html
      */
     public function render()
     {
-        // Add POST body and query params to the view.
-        $this->view->addData('post', $this->request->getParsedBody())
-            ->addData('query', $this->request->getQueryParams())
-            ->addData('form', $this->getFormData());
+        $get = $this->request->getQueryParams();
+        $queryVars = $this->cleanArray($get);
 
-        $output = $this->view->render();
+        $post = $this->request->getParsedBody();
+        $postVars = \is_array($post) ? $this->cleanArray($post) : [];
 
-        $this->response->getBody()->write($output);
+        $this->view->addData('postVars', $postVars);
+        $this->view->addData('queryVars', $queryVars);
+        $this->view->addData('form', $this->getFormData());
+
+        $html = $this->view->render();
+
+        $output = new StringStream($html);
+
+        $this->response = $this->response->withBody($output);
 
         return $this->response;
     }
