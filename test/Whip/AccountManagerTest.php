@@ -21,7 +21,7 @@ class AccountManagerTest extends \PHPUnit\Framework\TestCase
     public function setUp()
     {
         $this->mockAccountStorage = $this->createMock(AccountStorage::class);
-        $this->accountManager = new MockAccountManager();
+        $this->accountManager = $this->getMockForAbstractClass(AccountManager::class);
     }
 
     /**
@@ -85,7 +85,7 @@ class AccountManagerTest extends \PHPUnit\Framework\TestCase
 
         $actual = (string) \serialize($this->accountManager);
 
-        $this->assertEquals(219, strlen($actual));
+        $this->assertEquals(212, strlen($actual));
     }
 
     /**

@@ -6,7 +6,6 @@ use Psr\Http\Message\ServerRequestInterface;
 use Whip\Controllers\Html;
 use Whip\Form;
 use Whip\FormService;
-use Whip\Tests\Mocks\MockHtmlController;
 use Whip\View;
 
 /**
