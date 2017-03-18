@@ -22,17 +22,8 @@ abstract class Html
 {
     use Utilities;
 
-    /** @var array of \Whip\Form */
-    protected $forms;
-
     /** @var \Whip\FormService */
     protected $formService;
-
-    /** @var array Query string data when present in the request. */
-    protected $queryString;
-
-    /** @var array POST method data when present in the request. */
-    protected $postBody;
 
     /** @var \Psr\Http\Message\ServerRequestInterface */
     protected $request;
@@ -79,14 +70,14 @@ abstract class Html
     public function render()
     {
         $get = $this->request->getQueryParams();
-        $queryVars = $this->cleanArray($get);
+        $getVars = $this->cleanArray($get);
 
         $post = $this->request->getParsedBody();
         $postVars = \is_array($post) ? $this->cleanArray($post) : [];
 
         $this->view->addData('postVars', $postVars);
-        $this->view->addData('queryVars', $queryVars);
-        $this->view->addData('form', $this->getFormData());
+        $this->view->addData('queryVars', $getVars);
+        $this->view->addData('form', $this->formService->getRenderData());
 
         $html = $this->view->render();
 
@@ -109,24 +100,5 @@ abstract class Html
         $this->formService->addForm($key, $form);
 
         return $this;
-    }
-
-    /**
-     * Get data to fill in placeholders.
-     *
-     * @return array
-     */
-    protected function getFormData()
-    {
-        $formData = [];
-
-        // Append any form input and errors to the placeholder data.
-        if (is_array($this->forms) && count($this->forms) > 0) {
-            foreach($this->forms as $key => $form) {
-                $formData['form.'][$key] = $form->getRenderData();
-            }
-        }
-
-        return $formData;
     }
 }

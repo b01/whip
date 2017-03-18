@@ -14,6 +14,9 @@ abstract class FormService
 {
     use Utilities;
 
+    /** @var array of \Whip\Form */
+    protected $forms;
+
     /** @var string */
     private $formSubmitField;
 
@@ -24,7 +27,36 @@ abstract class FormService
      */
     public function __construct(string $formSubmitField)
     {
+        $this->forms = [];
         $this->formSubmitField = $formSubmitField;
+    }
+
+    /**
+     * Add a form to the service.
+     *
+     * @param string $formName
+     * @param \Whip\Form $form
+     */
+    public function addForm($formName, Form $form)
+    {
+        $this->forms[$formName] = $form;
+    }
+
+    /**
+     * Get data to fill in placeholders.
+     *
+     * @return array
+     */
+    public function getRenderData()
+    {
+        $formData = [];
+
+        // Append any form input and errors to the placeholder data.
+        foreach($this->forms as $key => $form) {
+            $formData['form.'][$key] = $form->getRenderData();
+        }
+
+        return $formData;
     }
 
     /**
