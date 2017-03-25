@@ -31,9 +31,6 @@ abstract class Html
     /** @var \Psr\Http\Message\ResponseInterface */
     protected $response;
 
-    /** @var \Whip\View */
-    protected $view;
-
     /**
      * Html constructor.
      *
@@ -45,12 +42,10 @@ abstract class Html
     public function __construct(
         ServerRequestInterface $request,
         ResponseInterface $response,
-        View $view,
         FormService $formService = null
     ) {
         $this->request = $request;
         $this->response = $response;
-        $this->view = $view;
         $this->formService = $formService;
     }
 
@@ -67,7 +62,7 @@ abstract class Html
      *
      * @return \Psr\Http\Message\ResponseInterface
      */
-    public function render()
+    public function render(View $view)
     {
         $get = $this->request->getQueryParams();
         $getVars = $this->cleanArray($get);
@@ -75,11 +70,11 @@ abstract class Html
         $post = $this->request->getParsedBody();
         $postVars = \is_array($post) ? $this->cleanArray($post) : [];
 
-        $this->view->addData('postVars', $postVars);
-        $this->view->addData('queryVars', $getVars);
-        $this->view->addData('form', $this->formService->getRenderData());
+        $view->addData('postVars', $postVars);
+        $view->addData('queryVars', $getVars);
+        $view->addData('form', $this->formService->getRenderData());
 
-        $html = $this->view->render();
+        $html = $view->render();
 
         $output = new StringStream($html);
 

@@ -42,7 +42,6 @@ class HtmlTest extends TestCase
             [
                 $this->mockRequest,
                 $this->mockResponse,
-                $this->mockView,
                 $this->mockFormService,
             ]
         );
@@ -84,7 +83,7 @@ class HtmlTest extends TestCase
             ->method('getRenderData')
             ->willReturn([]);
 
-        $actual = $this->htmlController->render();
+        $actual = $this->htmlController->render($this->mockView);
 
         $this->assertEquals($this->mockResponse, $actual);
     }
@@ -126,7 +125,7 @@ class HtmlTest extends TestCase
             ->method('getRenderData')
             ->willReturn([]);
 
-        $this->htmlController->render();
+        $this->htmlController->render($this->mockView);
     }
 
     /**
@@ -164,7 +163,7 @@ class HtmlTest extends TestCase
             ->method('getRenderData')
             ->willReturn([]);
 
-        $this->htmlController->render();
+        $this->htmlController->render($this->mockView);
     }
 
     /**
