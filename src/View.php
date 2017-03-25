@@ -33,12 +33,12 @@ abstract class View
     /**
      * Add placeholder data to the view.
      *
-     * @param array $data Must be a single dimension array.
+     * @param mixed $value Data to use in the template.
      * @return \Whip\View
      */
-    public function addData($key, array $data)
+    public function addData($key, $value)
     {
-        $this->data[$key] = array_merge($data);
+        $this->data[$key] = $value;
 
         return $this;
     }
@@ -50,10 +50,19 @@ abstract class View
      */
     public function render()
     {
+        $this->build();
+
         $this->renderer->withTemplate($this->getTemplateFile());
 
-        return $this->renderer->render($data);
+        return $this->renderer->render($this->data);
     }
+
+    /**
+     * Build the view.
+     *
+     * @return void
+     */
+    protected abstract function build();
 
     /**
      * Return name of a template file.
