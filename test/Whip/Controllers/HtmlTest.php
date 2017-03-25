@@ -175,8 +175,8 @@ class HtmlTest extends TestCase
 
         $this->mockFormService->expects($this->once())
             ->method('addForm')
-            ->with($this->equalTo('testForm'), $this->identicalTo($mockForm));
+            ->with($this->identicalTo($mockForm));
 
-        $this->htmlController->addForm('testForm', $mockForm);
+        $this->htmlController->addForm($mockForm);
     }
 }

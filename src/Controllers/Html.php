@@ -86,13 +86,14 @@ abstract class Html
     /**
      * Add a form to the page.
      *
-     *  Multiple forms can be added.
+     * Multiple forms can be added.
+     *
      * @param \Whip\Form $form
      * @return $this
      */
-    public function addForm($key, Form $form)
+    public function addForm(Form $form)
     {
-        $this->formService->addForm($key, $form);
+        $this->formService->addForm($form);
 
         return $this;
     }

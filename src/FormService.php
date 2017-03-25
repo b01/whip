@@ -34,12 +34,11 @@ abstract class FormService
     /**
      * Add a form to the service.
      *
-     * @param string $formName
      * @param \Whip\Form $form
      */
-    public function addForm($formName, Form $form)
+    public function addForm(Form $form)
     {
-        $this->forms[$formName] = $form;
+        $this->forms[$form->getName()] = $form;
     }
 
     /**
