@@ -38,7 +38,7 @@ abstract class FormService
      */
     public function addForm(Form $form)
     {
-        $this->forms[$form->getName()] = $form;
+        $this->forms[$form->getId()] = $form;
     }
 
     /**
