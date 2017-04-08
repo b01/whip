@@ -12,21 +12,21 @@ interface Form
      *
      * @return bool
      */
-    public function canSubmit();
+    public function canSubmit() : bool;
 
     /**
      * Get a unique name for this form.
      *
      * @return mixed
      */
-    public function getName();
+    public function getId();
 
     /**
      * Get data to pass to the template engine to aid rendering. For example, field value and errors.
      *
      * @return array
      */
-    public function getRenderData();
+    public function getRenderData() : array;
 
     /**
      * Clean the request variables by filtering each field, at least, through htmlspecialchars.

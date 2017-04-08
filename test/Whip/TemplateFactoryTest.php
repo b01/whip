@@ -27,9 +27,10 @@ class TemplateFactoryTest extends TestCase
     {
         $fixture = 'bad-diras*!@$';
 
-        $this->templateFactory::setTemplateDir($fixture);
+        $actual = $this->templateFactory::setTemplateDir($fixture);
 
         $this->assertNotEquals($fixture, $this->templateFactory::getTemplateDir());
+        $this->assertFalse($actual);
     }
 
     /**

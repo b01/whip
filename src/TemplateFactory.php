@@ -1,20 +1,21 @@
 <?php namespace Whip;
 
 /**
- * Description of TemplateFactory
+ * Class TemplateFactory
  *
+ * @package \Whip
  */
 abstract class TemplateFactory
 {
     /** @var string */
-    private static $templateDir;
+    protected static $templateDir;
 
     /**
      * Instantiate a template Renderer.
      *
      * @param \Whip\Renderer
      */
-    public static function create()
+    public static function create() : Renderer
     {
         return self::getRenderer();
     }
@@ -34,7 +35,7 @@ abstract class TemplateFactory
      * @param string $dir
      * @return boolean
      */
-    public static function setTemplateDir(string $dir)
+    public static function setTemplateDir(string $dir) : bool
     {
         if (file_exists($dir)) {
             self::$templateDir = $dir;
@@ -48,5 +49,5 @@ abstract class TemplateFactory
     /**
      * @return \Whip\Renderer
      */
-    abstract protected static function getRenderer();
+    abstract protected static function getRenderer() : Renderer;
 }

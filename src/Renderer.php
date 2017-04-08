@@ -22,7 +22,7 @@ interface Renderer
      * @param boolean $raw Turn off/on escaping of special characters in the output.
      * @return string
      */
-    public function render(array & $data = null, $raw = false);
+    public function render(array & $data = null, bool $raw = false);
 
     /**
      * @param string $template
