@@ -19,7 +19,7 @@ interface Form
      *
      * @return mixed
      */
-    public function getId();
+    public function getId() : string;
 
     /**
      * Get data to pass to the template engine to aid rendering. For example, field value and errors.
@@ -33,7 +33,7 @@ interface Form
      *
      * @param array $requestVars
      */
-    public function setInput(array $requestVars);
+    public function setInput(array $requestVars) : Form;
 
     /**
      * Perform the submission.
