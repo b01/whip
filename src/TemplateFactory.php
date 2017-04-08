@@ -17,7 +17,7 @@ abstract class TemplateFactory
      */
     public static function create() : Renderer
     {
-        return self::getRenderer();
+        return static::getRenderer();
     }
 
     /**
@@ -26,7 +26,7 @@ abstract class TemplateFactory
      */
     public static function getTemplateDir()
     {
-        return self::$templateDir;
+        return static::$templateDir;
     }
 
     /**
@@ -38,7 +38,7 @@ abstract class TemplateFactory
     public static function setTemplateDir(string $dir) : bool
     {
         if (file_exists($dir)) {
-            self::$templateDir = $dir;
+            static::$templateDir = $dir;
 
             return true;
         }
