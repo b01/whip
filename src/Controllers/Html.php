@@ -50,12 +50,19 @@ abstract class Html
     }
 
     /**
-     * Will perform a redirect under certain conditions.
+     * Add a form to the page.
      *
-     * @param string $url
-     * @param callable $metConditions
+     * Multiple forms can be added.
+     *
+     * @param \Whip\Form $form
+     * @return $this
      */
-    abstract public function shouldRedirect(string $url);
+    public function addForm(Form $form)
+    {
+        $this->formService->addForm($form);
+
+        return $this;
+    }
 
     /**
      * Render the HTML.
