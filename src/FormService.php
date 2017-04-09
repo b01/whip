@@ -59,26 +59,6 @@ abstract class FormService
     }
 
     /**
-     * Process a form in the request.
-     *
-     * @param \Psr\Http\Message\ServerRequestInterface $request
-     * @return bool|mixed
-     */
-    public function process(ServerRequestInterface $request, Form $form)
-    {
-        $formSubmitted = false;
-        $requestVars = $this->getScrubbedInput($request);
-
-        $form->setInput($requestVars);
-
-        if ($form->canSubmit()) {
-            $formSubmitted = $form->submit();
-        }
-
-        return $formSubmitted;
-    }
-
-    /**
      * Extract form input from the Request.
      *
      * @return array
@@ -94,5 +74,28 @@ abstract class FormService
         $requestVars = \array_merge($getVars, $postVars);
 
         return $requestVars;
+    }
+
+    /**
+     * Process a form in the request.
+     *
+     * @param \Psr\Http\Message\ServerRequestInterface $request
+     * @return bool
+     */
+    public function process(ServerRequestInterface $request) : bool
+    {
+        $formSubmitted = false;
+        $requestVars = $this->getScrubbedInput($request);
+
+        foreach ($this->forms as $form) {
+            $form->setInput($requestVars);
+
+            if ($form->canSubmit()) {
+                $form->submit();
+                $formSubmitted = true;
+            }
+        }
+
+        return $formSubmitted;
     }
 }

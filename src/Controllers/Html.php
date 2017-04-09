@@ -77,6 +77,9 @@ abstract class Html
         $post = $this->request->getParsedBody();
         $postVars = \is_array($post) ? $this->cleanArray($post) : [];
 
+        // Process any form submitted.
+        $this->formService->process($this->request);
+
         $view->addData('postVars', $postVars);
         $view->addData('queryVars', $getVars);
         $view->addData('form', $this->formService->getRenderData());
