@@ -4,7 +4,7 @@ use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
-use Whip\Controllers\Html;
+use Whip\Controllers\Http;
 use Whip\Form;
 use Whip\FormService;
 use Whip\View;
@@ -12,11 +12,11 @@ use Whip\View;
 /**
  * Class HtmlTest
  * @package Whip\Controllers\Tests
- * @coversDefaultClass \Whip\Controllers\Html
+ * @coversDefaultClass \Whip\Controllers\Http
  */
 class HtmlTest extends TestCase
 {
-    /** @var \Whip\Controllers\Html|\PHPUnit_Framework_MockObject_MockObject */
+    /** @var \Whip\Controllers\Http|\PHPUnit_Framework_MockObject_MockObject */
     private $htmlController;
 
     /** @var \Psr\Http\Message\ServerRequestInterface|\PHPUnit_Framework_MockObject_MockObject */
@@ -39,7 +39,7 @@ class HtmlTest extends TestCase
         $this->mockView = $this->createMock(View::class);
 
         $this->htmlController = $this->getMockForAbstractClass(
-            Html::class,
+            Http::class,
             [
                 $this->mockRequest,
                 $this->mockResponse,
@@ -53,7 +53,7 @@ class HtmlTest extends TestCase
      */
     public function testCanInitialize()
     {
-        $this->assertInstanceOf(Html::class, $this->htmlController);
+        $this->assertInstanceOf(Http::class, $this->htmlController);
     }
 
     /**
