@@ -7,11 +7,12 @@
 
 use Kshabazz\Slib\StringStream;
 use Kshabazz\Slib\Tools\Utilities;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\UriInterface;
 use Whip\Form;
 use Whip\FormService;
 use Whip\View;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * Class Html Render HTML response for
@@ -34,8 +35,8 @@ abstract class Html
     /**
      * Html constructor.
      *
-     * @param ServerRequestInterface $request
-     * @param ResponseInterface $response
+     * @param \Psr\Http\Message\ServerRequestInterface $request
+     * @param \Psr\Http\Message\ResponseInterface $response
      * @param View $view
      * @param FormService|null $formService
      */
@@ -94,17 +95,18 @@ abstract class Html
     }
 
     /**
-     * Add a form to the page.
+     * Redirect to a specified URL.
      *
-     * Multiple forms can be added.
-     *
-     * @param \Whip\Form $form
-     * @return $this
+     * @param \Psr\Http\Message\UriInterface $url
+     * @param int $httpStatusCode
+     * @return \Psr\Http\Message\ResponseInterface;
      */
-    public function addForm(Form $form)
+    public function redirectTo(UriInterface $url, int $httpStatusCode)
     {
-        $this->formService->addForm($form);
+        // Process any form submitted.
+        $this->formService->process($this->request);
 
-        return $this;
+        return $this->response->withStatus($httpStatusCode)
+            ->withHeader('Location', (string) $url);
     }
 }

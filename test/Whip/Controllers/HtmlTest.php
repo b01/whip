@@ -3,6 +3,7 @@
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\UriInterface;
 use Whip\Controllers\Html;
 use Whip\Form;
 use Whip\FormService;
@@ -178,5 +179,34 @@ class HtmlTest extends TestCase
             ->with($this->identicalTo($mockForm));
 
         $this->htmlController->addForm($mockForm);
+    }
+
+    /**
+     * @covers ::redirectTo
+     */
+    public function testCanPerformARedirect()
+    {
+        $mockUri = $this->createMock(UriInterface::class);
+        $mockUri->expects($this->once())
+            ->method('__toString')
+            ->willReturn('test');
+
+        $this->mockFormService->expects($this->once())
+            ->method('process');
+
+        $this->mockResponse->expects($this->once())
+            ->method('withStatus')
+            ->with(302)
+            ->willReturnSelf();
+
+        $this->mockResponse->expects($this->once())
+            ->method('withHeader')
+            ->with($this->identicalTo('Location'), $this->identicalTo('test'))
+            ->willReturnSelf();
+
+        $actual = $this->htmlController->redirectTo($mockUri, 302);
+
+        $this->assertEquals($this->mockResponse, $actual);
+
     }
 }
