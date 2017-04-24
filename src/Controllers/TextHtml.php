@@ -19,7 +19,7 @@ use Whip\View;
  *
  * @package \Whip\Controllers
  */
-abstract class Http
+abstract class TextHtml
 {
     use Utilities;
 
