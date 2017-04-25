@@ -3,7 +3,7 @@
 /**
  * Class Form
  *
- * @package \Suh\Forms
+ * @package \Whip\Forms
  */
 interface Form
 {

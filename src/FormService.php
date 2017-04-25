@@ -7,8 +7,6 @@ use Psr\Http\Message\ServerRequestInterface;
  * Class FormService
  *
  * @package \Whip
- *
- * TODO: See if this should become middle-ware, if so, then make it thus.
  */
 abstract class FormService
 {
@@ -36,9 +34,11 @@ abstract class FormService
      *
      * @param \Whip\Form $form
      */
-    public function addForm(Form $form)
+    public function addForm(Form $form) : \Whip\FormService
     {
         $this->forms[$form->getId()] = $form;
+
+        return $this;
     }
 
     /**
@@ -46,7 +46,7 @@ abstract class FormService
      *
      * @return array
      */
-    public function getRenderData()
+    public function getRenderData() : array
     {
         $formData = [];
 
@@ -63,7 +63,7 @@ abstract class FormService
      *
      * @return array
      */
-    public function getScrubbedInput(ServerRequestInterface $request)
+    public function getScrubbedInput(ServerRequestInterface $request) : array
     {
         $get = $request->getQueryParams();
         $getVars = $this->cleanArray($get);
@@ -71,7 +71,9 @@ abstract class FormService
         $post = $request->getParsedBody();
         $postVars = \is_array($post) ? $this->cleanArray($post) : [];
 
-        $requestVars = \array_merge($getVars, $postVars);
+        $fileVars = $request->getUploadedFiles();
+
+        $requestVars = \array_merge($getVars, $postVars, $fileVars);
 
         return $requestVars;
     }
