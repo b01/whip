@@ -1,4 +1,4 @@
-<?php namespace Whip\Controllers\Tests;
+<?php namespace Whip\Tests\Controllers;
 
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
@@ -113,7 +113,7 @@ final class TextHtmlTest extends TestCase
                         return $data['test'] === '1234&lt;&gt;';
                     })
                 ],
-                [$this->equalTo('form'), $this->anything()]
+                [$this->equalTo('forms'), $this->anything()]
             );
 
         $this->mockView->expects($this->once())
@@ -151,7 +151,7 @@ final class TextHtmlTest extends TestCase
                         return $data['test'] === '1234&lt;&gt;';
                     })],
                 [$this->equalTo('queryVars'), $this->anything()],
-                [$this->equalTo('form'), $this->anything()]
+                [$this->equalTo('forms'), $this->anything()]
             );
 
         $this->mockView->expects($this->once())

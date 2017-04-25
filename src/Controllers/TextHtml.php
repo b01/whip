@@ -83,7 +83,7 @@ abstract class TextHtml
 
         $view->addData('postVars', $postVars);
         $view->addData('queryVars', $getVars);
-        $view->addData('form', $this->formService->getRenderData());
+        $view->addData('forms', $this->formService->getRenderData());
 
         $html = $view->render();
 

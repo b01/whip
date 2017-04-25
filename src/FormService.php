@@ -16,7 +16,7 @@ abstract class FormService
     protected $forms;
 
     /** @var string */
-    private $formSubmitField;
+    protected $formSubmitField;
 
     /**
      * FormService constructor.
@@ -52,7 +52,7 @@ abstract class FormService
 
         // Append any form input and errors to the placeholder data.
         foreach($this->forms as $key => $form) {
-            $formData['form.'][$key] = $form->getRenderData();
+            $formData[$key] = $form->getRenderData();
         }
 
         return $formData;
@@ -63,7 +63,7 @@ abstract class FormService
      *
      * @return array
      */
-    public function getScrubbedInput(ServerRequestInterface $request) : array
+    private function getScrubbedInput(ServerRequestInterface $request) : array
     {
         $get = $request->getQueryParams();
         $getVars = $this->cleanArray($get);
@@ -79,25 +79,30 @@ abstract class FormService
     }
 
     /**
-     * Process a form in the request.
+     * Process the client input in the request.
      *
      * @param \Psr\Http\Message\ServerRequestInterface $request
-     * @return bool
+     * @return string
      */
-    public function process(ServerRequestInterface $request) : bool
+    public function process(ServerRequestInterface $request) : string
     {
-        $formSubmitted = false;
         $requestVars = $this->getScrubbedInput($request);
+        $form = null;
+        $newLocationUrl = '';
 
-        foreach ($this->forms as $form) {
+        // Find the submitted form.
+        if (\array_key_exists($this->formSubmitField, $requestVars)) {
+            $form = $this->forms[$requestVars[$this->formSubmitField]];
+        }
+
+        if ($form instanceof Form) {
             $form->setInput($requestVars);
 
             if ($form->canSubmit()) {
-                $form->submit();
-                $formSubmitted = true;
+                $newLocationUrl = $form->submit();
             }
         }
 
-        return $formSubmitted;
+        return $newLocationUrl;
     }
 }
