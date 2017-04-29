@@ -4,6 +4,7 @@
 /.phpunit/
 /cache/
 /logs/
+/nbproject/
 /node_modules/
 /vendor/
 /web-ui/css/
@@ -14,4 +15,4 @@
 /composer.lock
 /config/settings.php
 /npm-debug.log
-/nbproject/
+/web-ui/info.php
