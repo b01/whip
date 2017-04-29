@@ -92,7 +92,8 @@ abstract class FormService
 
         // Find the submitted form.
         if (\array_key_exists($this->formSubmitField, $requestVars)) {
-            $form = $this->forms[$requestVars[$this->formSubmitField]];
+            $formKey = $requestVars[$this->formSubmitField];
+            $form = $this->forms[$formKey];
         }
 
         if ($form instanceof Form) {
