@@ -11,9 +11,8 @@ interface Renderer
      * Add data to the template engine.
      *
      * @param array $data
-     * @return array List of all data added thus far.
      */
-    public function addData(array $data);
+    public function addData(array $data) : void;
 
     /**
      * Render the template.

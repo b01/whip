@@ -37,13 +37,14 @@ abstract class TemplateFactory
      */
     public static function setTemplateDir(string $dir) : bool
     {
+        $isSet = false;
+
         if (file_exists($dir)) {
             static::$templateDir = $dir;
-
-            return true;
+            $isSet = true;
         }
 
-        return false;
+        return $isSet;
     }
 
     /**
