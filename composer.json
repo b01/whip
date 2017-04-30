@@ -29,9 +29,15 @@
     },
     "require-dev": {
         "phpunit/phpunit": "^6.0",
-        "squizlabs/php_codesniffer": "^2.0"
+        "squizlabs/php_codesniffer": "^2.0",
+        "phpmd/phpmd": "*",
+        "twig/twig": "^2.0"
     },
     "scripts": {
-        "units": "phpunit"
+        "units": "phpunit",
+        "pcs": "./vendor/bin/phpcs -p --standard=PSR2 --severity=8 --colors src"
+    },
+    "suggest": {
+        "twig/twig": "Required if you plan to use the TwigRendered."
     }
 }
