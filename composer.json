@@ -1,4 +1,12 @@
 {
+    "authors": [
+        {
+            "homepage": "http://www.kshabazz.net/",
+            "name": "Khalifah Khalil Shabazz",
+            "role": "Developer"
+        }
+
+    ],
     "autoload": {
         "psr-4": {
             "Whip\\": "src"
@@ -10,6 +18,7 @@
         }
     },
     "description": "Whip web tools.",
+    "license": "MIT",
     "name": "kshabazz/whip",
     "require": {
         "kshabazz/slib": "dev-master",
