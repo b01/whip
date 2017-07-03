@@ -50,19 +50,10 @@ abstract class View
      */
     public function render()
     {
-        $this->build();
-
         $this->renderer->withTemplate($this->getTemplateFile());
 
         return $this->renderer->render($this->data);
     }
-
-    /**
-     * Build the view.
-     *
-     * @return void
-     */
-    protected abstract function build();
 
     /**
      * Return name of a template file.
