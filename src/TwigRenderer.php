@@ -29,7 +29,7 @@ final class TwigRenderer implements Renderer
     /**
      * @inheritdoc
      */
-    public function addData(array $data) : void
+    public function addData(array $data) : Renderer
     {
         foreach ($data as $key => $value) {
             $this->renderer->addGlobal($key, $value);
@@ -39,7 +39,8 @@ final class TwigRenderer implements Renderer
     /**
      * @inheritdoc
      */
-    public function render(array & $data = null, bool $raw = false) {
+    public function render(array & $data = null, bool $raw = false) : string
+    {
         $template = $this->renderer->load($this->templateFile);
 
         return $template->render($data);
@@ -48,7 +49,7 @@ final class TwigRenderer implements Renderer
     /**
      * @inheritdoc
      */
-    public function withTemplate(string $templateFile)
+    public function withTemplate(string $templateFile) : Renderer
     {
         $this->templateFile = $templateFile;
 

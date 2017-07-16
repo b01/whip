@@ -11,8 +11,9 @@ interface Renderer
      * Add data to the template engine.
      *
      * @param array $data
+     * @return \Whip\Renderer
      */
-    public function addData(array $data) : void;
+    public function addData(array $data) : Renderer;
 
     /**
      * Render the template.
@@ -21,11 +22,11 @@ interface Renderer
      * @param boolean $raw Turn off/on escaping of special characters in the output.
      * @return string
      */
-    public function render(array & $data = null, bool $raw = false);
+    public function render(array & $data = null, bool $raw = false) : string;
 
     /**
      * @param string $template
-     * @return $this
+     * @return \Whip\Renderer
      */
-    public function withTemplate(string $template);
+    public function withTemplate(string $template) : Renderer;
 }
