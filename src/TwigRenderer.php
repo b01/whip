@@ -34,6 +34,8 @@ final class TwigRenderer implements Renderer
         foreach ($data as $key => $value) {
             $this->renderer->addGlobal($key, $value);
         }
+
+        return $this;
     }
 
     /**

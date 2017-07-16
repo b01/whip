@@ -94,9 +94,6 @@ class ViewTest extends TestCase
             ->willReturn($fixtureTemplateFile);
 
         $view->expects($this->once())
-            ->method('build');
-
-        $view->expects($this->once())
             ->method('getTemplateFile')
             ->willReturn($fixtureTemplateFile);
 

@@ -60,6 +60,10 @@ class TwigRendererTest extends TestCase
             ->with($fixture)
             ->willReturn($this->mockTemplate);
 
+        $this->mockTemplate->expects($this->once())
+            ->method('render')
+            ->willReturn('');
+
         $tr = new TwigRenderer($this->mockRenderer);
 
         $tr->withTemplate($fixture)
