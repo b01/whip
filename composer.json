@@ -14,10 +14,10 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Whip\\Tests\\": "test/Whip"
+            "Whip\\Tests\\": "test"
         }
     },
-    "description": "Whip web tools.",
+    "description": "Whip gives you a foundation for building web pages with forms.",
     "license": "MIT",
     "name": "kshabazz/whip",
     "require": {
