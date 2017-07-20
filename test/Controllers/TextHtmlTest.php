@@ -72,7 +72,7 @@ final class TextHtmlTest extends TestCase
 
         $this->mockView->expects($this->any())
             ->method('addData')
-            ->willReturn('test');
+            ->willReturnSelf();
 
         $this->mockView->method('render')
             ->willReturn('test');

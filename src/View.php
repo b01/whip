@@ -36,7 +36,7 @@ abstract class View
      * @param mixed $value Data to use in the template.
      * @return \Whip\View
      */
-    public function addData($key, $value)
+    public function addData($key, $value) : View
     {
         $this->data[$key] = $value;
 
@@ -48,7 +48,7 @@ abstract class View
      *
      * @return string
      */
-    public function render()
+    public function render() : string
     {
         $this->renderer->withTemplate($this->getTemplateFile());
 
@@ -62,5 +62,5 @@ abstract class View
      *
      * @return string
      */
-    protected abstract function getTemplateFile();
+    protected abstract function getTemplateFile() : string;
 }

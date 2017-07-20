@@ -51,7 +51,7 @@ abstract class HtmlForm implements Form
     /**
      * @return bool
      */
-    public function hasNoErrors()
+    public function hasNoErrors() : bool
     {
         $errors = $this->validation->getErrors();
 

@@ -15,9 +15,9 @@ trait Log
      * Set the logger.
      *
      * @param LoggerInterface $logger
-     * @return $this
+     * @return static
      */
-    public function withLogger(LoggerInterface $logger)
+    public function withLogger(LoggerInterface $logger): self
     {
         $this->log = $logger;
 
