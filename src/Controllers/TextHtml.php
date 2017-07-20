@@ -51,21 +51,6 @@ abstract class TextHtml
     }
 
     /**
-     * Add a form to the page.
-     *
-     * Multiple forms can be added.
-     *
-     * @param \Whip\Form $form
-     * @return $this
-     */
-    public function addForm(Form $form)
-    {
-        $this->formService->addForm($form);
-
-        return $this;
-    }
-
-    /**
      * Render the HTML.
      *
      * @return \Psr\Http\Message\ResponseInterface

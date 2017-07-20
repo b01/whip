@@ -169,20 +169,6 @@ final class TextHtmlTest extends TestCase
     }
 
     /**
-     * @covers ::addForm
-     */
-    public function testWillCanAddAForm()
-    {
-        $mockForm = $this->createMock(Form::class);
-
-        $this->mockFormService->expects($this->once())
-            ->method('addForm')
-            ->with($this->identicalTo($mockForm));
-
-        $this->htmlController->addForm($mockForm);
-    }
-
-    /**
      * @covers ::redirectTo
      */
     public function testCanPerformARedirect()
