@@ -33,6 +33,7 @@ abstract class FormService
      * Add a form to the service.
      *
      * @param \Whip\Form $form
+     * @return \Whip\FormService
      */
     public function addForm(Form $form) : \Whip\FormService
     {
