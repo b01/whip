@@ -15,8 +15,10 @@ use Kshabazz\Slib\SlibException;
 class WhipException extends SlibException
 {
     const BAD_TPL_DIR = 1;
+    const BAD_SERVICE_REQUEST = 2;
 
     protected static $errorMap = [
-        self::BAD_TPL_DIR => 'The directory does not exists: "%s"'
+        self::BAD_TPL_DIR => 'The directory does not exists: "%s"',
+        self::BAD_SERVICE_REQUEST => 'Request to %s failed because: %s.'
     ];
 }

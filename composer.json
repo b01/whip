@@ -14,13 +14,14 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Whip\\Tests\\": "test"
+            "Whip\\Test\\": "test"
         }
     },
     "description": "Whip gives you a foundation for building web pages with forms.",
     "license": "MIT",
     "name": "kshabazz/whip",
     "require": {
+        "guzzlehttp/guzzle": "^6.0",
         "kshabazz/slib": "dev-master",
         "kshabazz/whip-lash": "dev-master",
         "php": ">=7.0",
