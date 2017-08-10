@@ -9,6 +9,7 @@ use Psr\Log\LoggerInterface;
  */
 trait Log
 {
+    /** @var \Psr\Log\LoggerInterface */
     private $log;
 
     /**
