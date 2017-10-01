@@ -64,6 +64,7 @@ abstract class TextHtml
         $postVars = \is_array($post) ? $this->cleanArray($post) : [];
 
         // Process any form submitted.
+        // TODO: Remove, as this function should only handle the rendering.
         $this->formService->process($this->request);
 
         $view->addData('postVars', $postVars);
@@ -86,12 +87,22 @@ abstract class TextHtml
      * @param int $httpStatusCode
      * @return \Psr\Http\Message\ResponseInterface;
      */
-    public function redirectTo(UriInterface $url, int $httpStatusCode)
-    {
+    public function redirectTo(
+        int $httpStatusCode,
+        string $route,
+        string $httpProtocol = 'https',
+        int $httpPort = 443
+    ) {
         // Process any form submitted.
+        // TODO: Remove, as this function should only handle redirect.
         $this->formService->process($this->request);
 
+        $uri = $this->request->getUri();
+        $newUri = $uri->withScheme($httpProtocol)
+            ->withPort($httpPort)
+            ->withPath($route);
+
         return $this->response->withStatus($httpStatusCode)
-            ->withHeader('Location', (string) $url);
+            ->withHeader('Location', (string) $newUri);
     }
 }

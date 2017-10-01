@@ -89,6 +89,8 @@ abstract class FormService
     {
         $requestVars = $this->getScrubbedInput($request);
         $form = null;
+        // TODO: Figure out if we always want to go to a new location, or just
+        // TODO: handle whatever submit returns.
         $newLocationUrl = '';
 
         // Find the submitted form.
