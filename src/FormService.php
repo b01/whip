@@ -80,7 +80,7 @@ abstract class FormService
     }
 
     /**
-     * Process the client input in the request.
+     * Try to process any form submitted by the client input in the request.
      *
      * @param \Psr\Http\Message\ServerRequestInterface $request
      * @return string

@@ -93,10 +93,6 @@ abstract class TextHtml
         string $httpProtocol = 'https',
         int $httpPort = 443
     ) {
-        // Process any form submitted.
-        // TODO: Remove, as this function should only handle redirect.
-        $this->formService->process($this->request);
-
         $uri = $this->request->getUri();
         $newUri = $uri->withScheme($httpProtocol)
             ->withPort($httpPort)
