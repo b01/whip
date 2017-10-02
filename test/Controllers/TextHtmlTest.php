@@ -5,7 +5,6 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
 use Whip\Controllers\TextHtml;
-use Whip\Form;
 use Whip\FormService;
 use Whip\View;
 
@@ -59,6 +58,7 @@ final class TextHtmlTest extends TestCase
 
     /**
      * @covers ::render
+     * @uses \Whip\Controllers\TextHtml::__construct
      */
     public function testCanRender()
     {
@@ -92,6 +92,7 @@ final class TextHtmlTest extends TestCase
 
     /**
      * @covers ::render
+     * @uses \Whip\Controllers\TextHtml::__construct
      */
     public function testWillCleanQueryParamsBeforeAddingToAView()
     {
@@ -132,6 +133,7 @@ final class TextHtmlTest extends TestCase
 
     /**
      * @covers ::render
+     * @uses \Whip\Controllers\TextHtml::__construct
      */
     public function testWillCleanPostParamsBeforeAddingToAView()
     {
@@ -170,6 +172,7 @@ final class TextHtmlTest extends TestCase
 
     /**
      * @covers ::redirectTo
+     * @uses \Whip\Controllers\TextHtml::__construct
      */
     public function testCanPerformARedirect()
     {
@@ -178,8 +181,20 @@ final class TextHtmlTest extends TestCase
             ->method('__toString')
             ->willReturn('test');
 
-        $this->mockFormService->expects($this->once())
-            ->method('process');
+        $mockUri->expects($this->once())
+            ->method('withPort')
+            ->with(443)
+            ->willReturnSelf();
+
+        $mockUri->expects($this->once())
+            ->method('withScheme')
+            ->with('https')
+            ->willReturnSelf();
+
+        $mockUri->expects($this->once())
+            ->method('withPath')
+            ->with('/test')
+            ->willReturnSelf();
 
         $this->mockResponse->expects($this->once())
             ->method('withStatus')
@@ -191,9 +206,23 @@ final class TextHtmlTest extends TestCase
             ->with($this->identicalTo('Location'), $this->identicalTo('test'))
             ->willReturnSelf();
 
-        $actual = $this->htmlController->redirectTo($mockUri, 302);
+        $this->mockRequest->expects($this->once())
+            ->method('getUri')
+            ->willReturn($mockUri);
+
+        $actual = $this->htmlController->redirectTo(302, '/test');
 
         $this->assertEquals($this->mockResponse, $actual);
+    }
 
+    /**
+     * @covers ::getResponse
+     * @uses \Whip\Controllers\TextHtml::__construct
+     */
+    public function testCanGetResponse()
+    {
+        $actual = $this->htmlController->getResponse();
+
+        $this->assertEquals($this->mockResponse, $actual);
     }
 }

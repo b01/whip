@@ -10,7 +10,7 @@ use Whip\Services\HttpService;
 /**
  * Class MockService
  *
- * @package \Whip\Test\Services
+ * @package \Whip\Test\Mocks
  */
 class MockService extends HttpService
 {

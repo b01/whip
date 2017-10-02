@@ -9,8 +9,6 @@ use Kshabazz\Slib\StringStream;
 use Kshabazz\Slib\Tools\Utilities;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\UriInterface;
-use Whip\Form;
 use Whip\FormService;
 use Whip\View;
 
@@ -51,7 +49,15 @@ abstract class TextHtml
     }
 
     /**
-     * Render the HTML.
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    public function getResponse()
+    {
+        return $this->response;
+    }
+
+    /**
+     * Build a response that will render the view (a.k.a the HTML).
      *
      * @return \Psr\Http\Message\ResponseInterface
      */
@@ -62,10 +68,6 @@ abstract class TextHtml
 
         $post = $this->request->getParsedBody();
         $postVars = \is_array($post) ? $this->cleanArray($post) : [];
-
-        // Process any form submitted.
-        // TODO: Remove, as this function should only handle the rendering.
-        $this->formService->process($this->request);
 
         $view->addData('postVars', $postVars);
         $view->addData('queryVars', $getVars);
