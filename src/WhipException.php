@@ -16,9 +16,11 @@ class WhipException extends SlibException
 {
     const BAD_TPL_DIR = 1;
     const BAD_SERVICE_REQUEST = 2;
+    const FORM_NOT_FOUND = 3;
 
     protected static $errorMap = [
         self::BAD_TPL_DIR => 'The directory does not exists: "%s"',
-        self::BAD_SERVICE_REQUEST => 'Request to %s failed because: %s.'
+        self::BAD_SERVICE_REQUEST => 'Request to %s failed because: %s.',
+        self::FORM_NOT_FOUND => 'Could not find form "%s".'
     ];
 }

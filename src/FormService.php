@@ -83,30 +83,26 @@ abstract class FormService
      * Try to process any form submitted by the client input in the request.
      *
      * @param \Psr\Http\Message\ServerRequestInterface $request
-     * @return string
+     * @return int always return the stat of the processed for.
+     * @exception When the form cannot be found.
      */
-    public function process(ServerRequestInterface $request) : string
+    public function process(ServerRequestInterface $request) : int
     {
         $requestVars = $this->getScrubbedInput($request);
         $form = null;
-        // TODO: Figure out if we always want to go to a new location, or just
-        // TODO: handle whatever submit returns.
-        $newLocationUrl = '';
 
         // Find the submitted form.
-        if (\array_key_exists($this->formSubmitField, $requestVars)) {
-            $formKey = $requestVars[$this->formSubmitField];
-            $form = $this->forms[$formKey];
+        if (!\array_key_exists($this->formSubmitField, $requestVars)) {
+            throw new WhipException(WhipException::FORM_NOT_FOUND, [$this->formSubmitField]);
         }
 
-        if ($form instanceof Form) {
-            $form->setInput($requestVars);
+        $formKey = $requestVars[$this->formSubmitField];
+        $form = $this->forms[$formKey];
 
-            if ($form->canSubmit()) {
-                $newLocationUrl = $form->submit();
-            }
-        }
+        $form->setInput($requestVars);
 
-        return $newLocationUrl;
+        return $form->canSubmit()
+            ? $form->submit()
+            : $form->getState();
     }
 }

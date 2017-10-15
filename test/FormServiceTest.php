@@ -104,7 +104,7 @@ class FormServiceTest extends TestCase
     public function testCanProcessSubmittedFormAndGetNewLocationUrl()
     {
         $fixtureName = __FUNCTION__;
-        $fixtureUrl = 'test.url';
+        $fixtureSubmit = 3412432;
 
         $this->mockServerRequest->expects($this->once())
             ->method('getQueryParams')
@@ -128,11 +128,30 @@ class FormServiceTest extends TestCase
 
         $this->mockForm->expects($this->once())
             ->method('submit')
-            ->willReturn($fixtureUrl);
+            ->willReturn($fixtureSubmit);
 
         $actual = $this->formService->addForm($this->mockForm)
             ->process($this->mockServerRequest);
 
-        $this->assertEquals($fixtureUrl, $actual);
+        $this->assertEquals($fixtureSubmit, $actual);
+    }
+
+    /**
+     * @covers ::process
+     * @covers ::getScrubbedInput
+     * @uses \Whip\FormService::addForm
+     * @expectedException \Whip\WhipException
+     */
+    public function testWillThrowAnExceptionWhenFormNotFound()
+    {
+        $this->mockServerRequest->expects($this->once())
+            ->method('getQueryParams')
+            ->willReturn([]);
+
+        $this->mockServerRequest->expects($this->once())
+            ->method('getUploadedFiles')
+            ->willReturn([]);
+
+        $this->formService->process($this->mockServerRequest);
     }
 }
