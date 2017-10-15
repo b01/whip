@@ -39,6 +39,9 @@ interface Form
     /**
      * Indicates the current state of the form.
      *
+     * Though optional, this should be set at the appropriate times to indicate the forms current state.
+     * Optional because its only important to the application that implements them.
+     *
      * @return int
      */
     public function getState() : int;

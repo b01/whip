@@ -23,6 +23,9 @@ abstract class HtmlForm implements Form
     /** @var array Client form input. */
     protected $input;
 
+    /** @var int Set at the appropriate times to indicate the forms current state. */
+    protected $state;
+
     /** @var \Whip\Lash\Validation */
     protected $validation;
 
@@ -36,6 +39,8 @@ abstract class HtmlForm implements Form
         $this->validation = $validation;
 
         $this->input = [self::FORM_ID_KEY => $this->getId()];
+
+        $this->state = static::NOT_PROCESSED;
     }
 
     /**
