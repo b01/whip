@@ -7,6 +7,14 @@
  */
 interface Form
 {
+    const NOT_PROCESSED = 0;
+
+    const VALIDATED = 1;
+
+    const SUBMITTED = 2;
+
+    const INVALID = 3;
+
     /**
      * Perform any checks that determine if the form can be submitted.
      *
@@ -27,6 +35,13 @@ interface Form
      * @return array
      */
     public function getRenderData() : array;
+
+    /**
+     * Indicates the current state of the form.
+     *
+     * @return int
+     */
+    public function getState() : int;
 
     /**
      * Clean the request variables by filtering each field, at least, through htmlspecialchars.
