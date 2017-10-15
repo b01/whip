@@ -54,6 +54,14 @@ abstract class HtmlForm implements Form
     }
 
     /**
+     * @inheritdoc
+     */
+    public function getState() : int
+    {
+        return $this->state;
+    }
+
+    /**
      * @return bool
      */
     public function hasNoErrors() : bool
