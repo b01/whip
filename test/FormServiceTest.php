@@ -146,7 +146,7 @@ class FormServiceTest extends TestCase
     {
         $this->mockServerRequest->expects($this->once())
             ->method('getQueryParams')
-            ->willReturn([]);
+            ->willReturn(['testName' => __FUNCTION__]);
 
         $this->mockServerRequest->expects($this->once())
             ->method('getUploadedFiles')
