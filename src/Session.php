@@ -13,7 +13,7 @@
 trait Session
 {
     /** @var \Whip\SessionWrapper */
-    private $session;
+    protected $session;
 
     /**
      * @param $key
