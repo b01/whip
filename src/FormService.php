@@ -1,6 +1,7 @@
 <?php namespace Whip;
 
 use Kshabazz\Slib\Tools\Utilities;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 /**
@@ -86,15 +87,17 @@ abstract class FormService
      * @return ?int always return the state of the processed form.
      * @exception When the form cannot be found.
      */
-    public function process(ServerRequestInterface $request) : ?int
+    public function process(ContainerInterface $container, ServerRequestInterface $request) : ?int
     {
         $requestVars = $this->getScrubbedInput($request);
-        $form = null;
         $returnVal = null;
 
         // Find the submitted form.
         $formKey = $this->getSafeArray($this->formSubmitField, $requestVars);
         $form = $this->getFromArray($formKey, $this->forms);
+        $form = $container->has($formKey)
+            ? $container->get($formKey)
+            : null;
 
         // Form key was found but no form.
         if (!empty($formKey) && empty($form)) {
