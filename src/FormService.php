@@ -84,10 +84,10 @@ abstract class FormService
      * Try to process any form submitted by the client input in the request.
      *
      * @param \Psr\Http\Message\ServerRequestInterface $request
-     * @return ?int always return the state of the processed form.
+     * @return \Whip\Form
      * @exception When the form cannot be found.
      */
-    public function process(ContainerInterface $container, ServerRequestInterface $request) : ?int
+    public function process(ServerRequestInterface $request) : ?Form
     {
         $requestVars = $this->getScrubbedInput($request);
         $returnVal = null;
@@ -95,23 +95,21 @@ abstract class FormService
         // Find the submitted form.
         $formKey = $this->getSafeArray($this->formSubmitField, $requestVars);
         $form = $this->getFromArray($formKey, $this->forms);
-        $form = $container->has($formKey)
-            ? $container->get($formKey)
-            : null;
 
         // Form key was found but no form.
         if (!empty($formKey) && empty($form)) {
             throw new WhipException(WhipException::FORM_NOT_FOUND, [$this->formSubmitField]);
         }
 
+        // This check keeps an error from being thrown when no form key or form is found.
         if (!empty($form)) {
             $form->setInput($requestVars);
 
-            $returnVal = $form->canSubmit()
+            $form->canSubmit()
                 ? $form->submit()
                 : $form->getState();
         }
 
-        return $returnVal;
+        return $form;
     }
 }

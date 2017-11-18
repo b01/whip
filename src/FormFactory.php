@@ -5,6 +5,8 @@
  * this file are reserved by Khalifah Khalil Shabazz
  */
 
+use Psr\Container\ContainerInterface;
+
 /**
  * Class FormFactory
  *
@@ -12,55 +14,33 @@
  */
 class FormFactory
 {
-    /** @var array<\Whip\Form> */
-    private $forms;
+    /** @var \Psr\Container\ContainerInterface */
+    private static $container;
 
-    /** @var array<callable> The callable MUST return a \Whip\Form */
-    private $formInitializer;
-
-    /**
-     * Set a callable to initialize a form.
-     *
-     * @param string $formName
-     * @param callable $callback
-     */
-    public function set(string $formName, callable $callback)
-    {
-        $this->formInitializer[$formName] = $callback;
-    }
-
-    /**
-     * Get a form.
-     *
-     * @param $formName
-     * @return \Whip\Form|null
-     */
-    public function get(string $formName) : ?Form
-    {
-        $form = \array_key_exists($formName, $this->forms)
-            ? $this->forms[$formName]
-            : $this->instantiateForm($formName);
-
-        return $form;
-    }
-
-    /**
-     * @param string $formName
-     * @return \Whip\Form|null
-     * @throws \Whip\WhipException
-     */
-    public function instantiateForm(string $formName) : ?Form
+    public static function instantiate(string $fullFormName)
     {
         $form = null;
 
-        if (\array_key_exists($formName, $this->formInitializer)) {
-            $form = $this->formInitializer[$formName]();
+        if (\class_exists($fullFormName)) {
+            $form = $fullFormName::instantiate(self::$container);
         }
 
-        if ($form instanceOf Form) {
-            throw new WhipException(WhipException::FORM_NOT_FOUND, [$formName]);
+        if (!$form instanceof Form) {
+            throw new WhipException(
+                WhipException::FORM_NOT_FOUND,
+                [$fullFormName]
+            );
         }
 
         return $form;
+    }
+
+    /**
+     * @param ContainerInterface $container
+     * @return void
+     */
+    public static function setContainer(ContainerInterface $container)
+    {
+        self::$container = $container;
     }
 }

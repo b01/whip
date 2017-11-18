@@ -104,7 +104,6 @@ class FormServiceTest extends TestCase
     public function testCanProcessSubmittedFormAndGetNewLocationUrl()
     {
         $fixtureName = __FUNCTION__;
-        $fixtureSubmit = 3412432;
 
         $this->mockServerRequest->expects($this->once())
             ->method('getQueryParams')
@@ -127,13 +126,12 @@ class FormServiceTest extends TestCase
             ->willReturn(true);
 
         $this->mockForm->expects($this->once())
-            ->method('submit')
-            ->willReturn($fixtureSubmit);
+            ->method('submit');
 
         $actual = $this->formService->addForm($this->mockForm)
             ->process($this->mockServerRequest);
 
-        $this->assertEquals($fixtureSubmit, $actual);
+        $this->assertEquals($this->mockForm, $actual);
     }
 
     /**
