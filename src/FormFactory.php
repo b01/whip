@@ -30,18 +30,26 @@ class FormFactory
      * @param callable $initializer
      * @return \Whip\FormFactory
      */
-    public function set(string $fullClassName, callable $initializer)
-    {
+    public function set(
+        string $fullClassName,
+        callable $initializer,
+        bool $overwrite = false
+    ) {
         $exists = \class_exists($fullClassName);
         $isWhipForm = $this->isWhipForm($fullClassName);
 
-        if ($exists && $isWhipForm) {
-            // Call the forms static getId() method.
-            $formName = \call_user_func($fullClassName . '::getId');
+        // Call the forms static getId() method.
+        $formName = $exists && $isWhipForm
+            ? \call_user_func($fullClassName . '::getId')
+            : null;
 
-            // Now the name should match the name in the HTTP request.
-            $this->formInitializer[$formName] = $initializer;
+        if (\array_key_exists($formName, $this->formInitializer)
+            && !$overwrite) {
+            throw new WhipException(WhipException::FORM_OVERWRITE, [$fullClassName, $formName]);
         }
+
+        // The name should match the name in the HTTP request.
+        $this->formInitializer[$formName] = $initializer;
 
         return $this;
     }

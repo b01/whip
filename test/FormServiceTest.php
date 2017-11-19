@@ -5,8 +5,11 @@
  * this file are reserved by Khalifah Khalil Shabazz
  */
 
+use function foo\func;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
+use Whip\Form;
+use Whip\FormFactory;
 use Whip\FormService;
 use Whip\Lash\Validator;
 use Whip\Test\Mocks\MockHtmlForm;
@@ -20,13 +23,19 @@ use Whip\Test\Mocks\MockHtmlForm;
 class FormServiceTest extends TestCase
 {
     /** @var \Whip\FormService|\PHPUnit_Framework_MockObject_MockObject */
-    private $formService;
+    private $sut;
 
     /** @var string */
     private $formSubmitField;
 
+    /** @var \Whip\Test\Mocks\MockHtmlForm|\PHPUnit_Framework_MockObject_MockObject */
+    private $form;
+
     /** @var \Whip\Form|\PHPUnit_Framework_MockObject_MockObject */
     private $mockForm;
+
+    /** @var \Whip\FormFactory|\PHPUnit_Framework_MockObject_MockObject */
+    private $mockFormFactory;
 
     /** @var \Psr\Http\Message\ServerRequestInterface|\PHPUnit_Framework_MockObject_MockObject */
     private $mockServerRequest;
@@ -38,9 +47,14 @@ class FormServiceTest extends TestCase
     {
         $this->mockServerRequest = $this->createMock(ServerRequestInterface::class);
         $this->formSubmitField = 'testName';
-        $this->formService = $this->getMockForAbstractClass(FormService::class, [$this->formSubmitField]);
+        $this->mockFormFactory = $this->createMock(FormFactory::class);
+        $this->sut = $this->getMockForAbstractClass(
+            FormService::class,
+            [$this->formSubmitField, $this->mockFormFactory]
+        );
         $this->mockValidator = $this->createMock(Validator::class);
-        $this->mockForm = new MockHtmlForm($this->mockValidator);
+        $this->mockForm = $this->createMock(Form::class);
+        $this->form = new MockHtmlForm($this->mockValidator);
     }
 
     /**
@@ -48,7 +62,7 @@ class FormServiceTest extends TestCase
      */
     public function testInitialization()
     {
-        $this->assertInstanceOf(FormService::class, $this->formService);
+        $this->assertInstanceOf(FormService::class, $this->sut);
     }
 
     /**
@@ -67,7 +81,17 @@ class FormServiceTest extends TestCase
             ->method('getUploadedFiles')
             ->willReturn([$this->formSubmitField => $fixtureName]);
 
-        $this->formService->addForm($this->mockForm)
+        $closureFixture = function (){};
+        $this->mockFormFactory->expects($this->once())
+            ->method('set')
+            ->with(MockHtmlForm::class, $closureFixture, false);
+
+        $this->mockFormFactory->expects($this->once())
+            ->method('get')
+            ->with(MockHtmlForm::getId())
+            ->willReturn($this->mockForm);
+
+        $this->sut->addForm(MockHtmlForm::class, $closureFixture)
             ->process($this->mockServerRequest);
     }
 
@@ -77,12 +101,23 @@ class FormServiceTest extends TestCase
      */
     public function testCanGetRenderData()
     {
-        $expected = MockHtmlForm::getId();
+        $formNameFixture = MockHtmlForm::getId();
+        $closureFixture = function (){};
+        $expected = [__FUNCTION__];
 
-        $actual = $this->formService->addForm($this->mockForm)
-            ->getRenderData();
+        $this->mockForm->expects($this->once())
+            ->method('getRenderData')
+            ->willReturn($expected);
 
-        $this->assertArrayHasKey($expected, $actual);
+        $this->mockFormFactory->expects($this->once())
+            ->method('get')
+            ->with($formNameFixture)
+            ->willReturn($this->mockForm);
+
+        $actual = $this->sut->addForm(MockHtmlForm::class, $closureFixture)
+            ->getRenderData([$formNameFixture]);
+
+        $this->assertEquals($expected[0], $actual[$formNameFixture][0]);
     }
 
     /**
@@ -102,8 +137,16 @@ class FormServiceTest extends TestCase
             ->method('getUploadedFiles')
             ->willReturn([]);
 
-        $actual = $this->formService->addForm($this->mockForm)
-            ->process($this->mockServerRequest);
+        $this->mockFormFactory->expects($this->once())
+            ->method('get')
+            ->with($this->equalTo($fixtureName))
+            ->willReturn($this->mockForm);
+
+        $this->mockForm->expects($this->once())
+            ->method('canSubmit')
+            ->willReturn(true);
+
+        $actual = $this->sut->process($this->mockServerRequest);
 
         $this->assertEquals($this->mockForm, $actual);
     }
@@ -111,7 +154,6 @@ class FormServiceTest extends TestCase
     /**
      * @covers ::process
      * @covers ::getScrubbedInput
-     * @uses \Whip\FormService::addForm
      * @expectedException \Whip\WhipException
      */
     public function testWillThrowAnExceptionWhenFormNotFound()
@@ -124,6 +166,6 @@ class FormServiceTest extends TestCase
             ->method('getUploadedFiles')
             ->willReturn([]);
 
-        $this->formService->process($this->mockServerRequest);
+        $this->sut->process($this->mockServerRequest);
     }
 }

@@ -1,7 +1,6 @@
 <?php namespace Whip;
 
 use Kshabazz\Slib\Tools\Utilities;
-use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 /**
@@ -12,6 +11,9 @@ use Psr\Http\Message\ServerRequestInterface;
 abstract class FormService
 {
     use Utilities;
+
+    /** @var \Whip\FormFactory */
+    protected $factory;
 
     /** @var array of \Whip\Form */
     protected $forms;
@@ -24,10 +26,13 @@ abstract class FormService
      *
      * @param string $formSubmitField
      */
-    public function __construct(string $formSubmitField)
-    {
+    public function __construct(
+        string $formSubmitField,
+        FormFactory $factory
+    ) {
         $this->forms = [];
         $this->formSubmitField = $formSubmitField;
+        $this->factory = $factory;
     }
 
     /**
@@ -36,15 +41,9 @@ abstract class FormService
      * @param \Whip\Form $form
      * @return \Whip\FormService
      */
-    public function addForm(Form $form, $overwrite = false) : \Whip\FormService
+    public function addForm(string $fullClassName, callable $initializer, bool $overwrite = false) : FormService
     {
-        $formId = \call_user_func(\get_class($form) . '::getId');
-
-        if (\array_key_exists($formId, $this->forms) && !$overwrite) {
-            throw new WhipException(WhipException::FORM_OVERWRITE, [$formId]);
-        }
-
-        $this->forms[$formId] = $form;
+        $this->factory->set($fullClassName, $initializer, $overwrite);
 
         return $this;
     }
@@ -54,13 +53,13 @@ abstract class FormService
      *
      * @return array
      */
-    public function getRenderData() : array
+    public function getRenderData(array $formNames) : array
     {
         $formData = [];
 
-        // Append any form input and errors to the placeholder data.
-        foreach($this->forms as $key => $form) {
-            $formData[$key] = $form->getRenderData();
+        foreach ($formNames as $formName) {
+            $this->forms[$formName] = $this->factory->get($formName);
+            $formData[$formName] = $this->forms[$formName]->getRenderData();
         }
 
         return $formData;
@@ -95,17 +94,19 @@ abstract class FormService
      */
     public function process(ServerRequestInterface $request) : ?Form
     {
+        // TODO: Extract to separate function.
         $requestVars = $this->getScrubbedInput($request);
         $returnVal = null;
 
         // Find the submitted form.
-        $formKey = $this->getSafeArray($this->formSubmitField, $requestVars);
-        $form = $this->getFromArray($formKey, $this->forms);
+        $formId = $this->getSafeArray($this->formSubmitField, $requestVars);
+        $form = $this->factory->get($formId);
 
         // Form key was found but no form.
-        if (!empty($formKey) && empty($form)) {
+        if (!empty($formId) && empty($form)) {
             throw new WhipException(WhipException::FORM_NOT_FOUND, [$this->formSubmitField]);
         }
+        // TODO: End extraction.
 
         // This check keeps an error from being thrown when no form key or form is found.
         if (!empty($form)) {

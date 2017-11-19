@@ -19,7 +19,7 @@ use Whip\Test\Mocks\MockHtmlForm;
 class HtmlFormTest extends TestCase
 {
     /** @var \Whip\HtmlForm|\PHPUnit_Framework_MockObject_MockObject */
-    private $htmlForm;
+    private $sut;
 
     /** @var \Whip\Lash\Validator|\PHPUnit_Framework_MockObject_MockObject */
     private $mockValidator;
@@ -27,7 +27,7 @@ class HtmlFormTest extends TestCase
     public function setUp()
     {
         $this->mockValidator = $this->createMock(Validator::class);
-        $this->htmlForm = new MockHtmlForm($this->mockValidator);
+        $this->sut = new MockHtmlForm($this->mockValidator);
     }
 
     /**
@@ -35,7 +35,7 @@ class HtmlFormTest extends TestCase
      */
     public function testCanInitialize()
     {
-        $this->assertInstanceOf(HtmlForm::class, $this->htmlForm);
+        $this->assertInstanceOf(HtmlForm::class, $this->sut);
     }
 
     /**
@@ -48,7 +48,7 @@ class HtmlFormTest extends TestCase
             ->method('getErrors')
             ->willReturn(['test']);
 
-        $actual = $this->htmlForm->getRenderData();
+        $actual = $this->sut->getRenderData();
 
         $this->assertEquals('test', $actual[HtmlForm::FORM_ERRORS_KEY][0]);
     }
@@ -63,7 +63,7 @@ class HtmlFormTest extends TestCase
             ->method('getErrors')
             ->willReturn(['test']);
 
-        $actual = $this->htmlForm->hasNoErrors();
+        $actual = $this->sut->hasNoErrors();
 
         $this->assertFalse($actual);
     }
@@ -78,7 +78,7 @@ class HtmlFormTest extends TestCase
             ->method('getErrors')
             ->willReturn([]);
 
-        $actual = $this->htmlForm->hasNoErrors();
+        $actual = $this->sut->hasNoErrors();
 
         $this->assertTrue($actual);
     }
@@ -89,7 +89,7 @@ class HtmlFormTest extends TestCase
      */
     public function testCanGetState()
     {
-        $actual = $this->htmlForm->getState();
+        $actual = $this->sut->getState();
 
         $this->assertEquals(HtmlForm::NOT_PROCESSED, $actual);
     }
