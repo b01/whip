@@ -5,8 +5,6 @@
  * this file are reserved by Khalifah Khalil Shabazz
  */
 
-use Psr\Container\ContainerInterface;
-
 /**
  * Class FormFactory
  *
@@ -14,33 +12,71 @@ use Psr\Container\ContainerInterface;
  */
 class FormFactory
 {
-    /** @var \Psr\Container\ContainerInterface */
-    private static $container;
+    /** @var array<callable> The callable MUST return a \Whip\Form */
+    private $formInitializer;
 
-    public static function instantiate(string $fullFormName)
+    /**
+     * FormFactory constructor.
+     */
+    public function __construct()
     {
-        $form = null;
-
-        if (\class_exists($fullFormName)) {
-            $form = $fullFormName::instantiate(self::$container);
-        }
-
-        if (!$form instanceof Form) {
-            throw new WhipException(
-                WhipException::FORM_NOT_FOUND,
-                [$fullFormName]
-            );
-        }
-
-        return $form;
+        $this->formInitializer = [];
     }
 
     /**
-     * @param ContainerInterface $container
-     * @return void
+     * Set a callable to initialize a form.
+     *
+     * @param string $fullClassName
+     * @param callable $initializer
+     * @return \Whip\FormFactory
      */
-    public static function setContainer(ContainerInterface $container)
+    public function set(string $fullClassName, callable $initializer)
     {
-        self::$container = $container;
+        $exists = \class_exists($fullClassName);
+        $isWhipForm = $this->isWhipForm($fullClassName);
+
+        if ($exists && $isWhipForm) {
+            // Call the forms static getId() method.
+            $formName = \call_user_func($fullClassName . '::getId');
+
+            // Now the name should match the name in the HTTP request.
+            $this->formInitializer[$formName] = $initializer;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Determine if a full class name string is of type Whip\Form.
+     *
+     * @param $fullClassName
+     * @return bool
+     */
+    private function isWhipForm($fullClassName)
+    {
+        $parents = \class_implements($fullClassName);
+        return \in_array(Form::class, $parents, true);
+    }
+
+    /**
+     * Get a new instance of a form.
+     *
+     * @param string $formName
+     * @return null|Form
+     * @throws WhipException
+     */
+    public function get(string $formName) : ?Form
+    {
+        $form = null;
+
+        if (\array_key_exists($formName, $this->formInitializer)) {
+            $form = $this->formInitializer[$formName]();
+        }
+
+        if (!$form instanceOf Form) {
+            throw new WhipException(WhipException::FORM_NOT_FOUND, [$formName]);
+        }
+
+        return $form;
     }
 }

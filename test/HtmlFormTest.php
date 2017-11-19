@@ -7,8 +7,8 @@
 
 use Whip\HtmlForm;
 use PHPUnit\Framework\TestCase;
-use Whip\Lash\Validation;
 use Whip\Lash\Validator;
+use Whip\Test\Mocks\MockHtmlForm;
 
 /**
  * Class HtmlFormTest
@@ -27,10 +27,7 @@ class HtmlFormTest extends TestCase
     public function setUp()
     {
         $this->mockValidator = $this->createMock(Validator::class);
-        $this->htmlForm = $this->getMockForAbstractClass(
-            HtmlForm::class,
-            [$this->mockValidator]
-        );
+        $this->htmlForm = new MockHtmlForm($this->mockValidator);
     }
 
     /**

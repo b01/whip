@@ -7,8 +7,9 @@
 
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
-use Whip\Form;
 use Whip\FormService;
+use Whip\Lash\Validator;
+use Whip\Test\Mocks\MockHtmlForm;
 
 /**
  * Class FormServiceTest
@@ -30,12 +31,16 @@ class FormServiceTest extends TestCase
     /** @var \Psr\Http\Message\ServerRequestInterface|\PHPUnit_Framework_MockObject_MockObject */
     private $mockServerRequest;
 
+    /** @var \Whip\Lash\Validator|\PHPUnit_Framework_MockObject_MockObject */
+    private $mockValidator;
+
     public function setUp()
     {
         $this->mockServerRequest = $this->createMock(ServerRequestInterface::class);
         $this->formSubmitField = 'testName';
         $this->formService = $this->getMockForAbstractClass(FormService::class, [$this->formSubmitField]);
-        $this->mockForm = $this->createMock(Form::class);
+        $this->mockValidator = $this->createMock(Validator::class);
+        $this->mockForm = new MockHtmlForm($this->mockValidator);
     }
 
     /**
@@ -52,7 +57,7 @@ class FormServiceTest extends TestCase
      */
     public function testCanAddAForm()
     {
-        $fixtureName = '1234';
+        $fixtureName = MockHtmlForm::getId();
 
         $this->mockServerRequest->expects($this->once())
             ->method('getQueryParams')
@@ -61,14 +66,6 @@ class FormServiceTest extends TestCase
         $this->mockServerRequest->expects($this->once())
             ->method('getUploadedFiles')
             ->willReturn([$this->formSubmitField => $fixtureName]);
-
-        $this->mockForm->expects($this->once())
-            ->method('getId')
-            ->willReturn($fixtureName);
-
-        $this->mockForm->expects($this->once())
-            ->method('canSubmit')
-            ->willReturn(false);
 
         $this->formService->addForm($this->mockForm)
             ->process($this->mockServerRequest);
@@ -80,20 +77,12 @@ class FormServiceTest extends TestCase
      */
     public function testCanGetRenderData()
     {
-        $fixtureName = '1234';
-
-        $this->mockForm->expects($this->once())
-            ->method('getId')
-            ->willReturn($fixtureName);
-
-        $this->mockForm->expects($this->once())
-            ->method('getRenderData')
-            ->willReturn([]);
+        $expected = MockHtmlForm::getId();
 
         $actual = $this->formService->addForm($this->mockForm)
             ->getRenderData();
 
-        $this->assertArrayHasKey('1234', $actual);
+        $this->assertArrayHasKey($expected, $actual);
     }
 
     /**
@@ -101,9 +90,9 @@ class FormServiceTest extends TestCase
      * @covers ::getScrubbedInput
      * @uses \Whip\FormService::addForm
      */
-    public function testCanProcessSubmittedFormAndGetNewLocationUrl()
+    public function testCanAddAndProcessAndGetTheSubmittedForm()
     {
-        $fixtureName = __FUNCTION__;
+        $fixtureName = MockHtmlForm::getId();
 
         $this->mockServerRequest->expects($this->once())
             ->method('getQueryParams')
@@ -111,22 +100,7 @@ class FormServiceTest extends TestCase
 
         $this->mockServerRequest->expects($this->once())
             ->method('getUploadedFiles')
-            ->willReturn([$this->formSubmitField => $fixtureName]);
-
-        $this->mockForm->expects($this->once())
-            ->method('getId')
-            ->willReturn($fixtureName);
-
-        $this->mockForm->expects($this->once())
-            ->method('setInput')
-            ->willReturn($this->mockForm);
-
-        $this->mockForm->expects($this->once())
-            ->method('canSubmit')
-            ->willReturn(true);
-
-        $this->mockForm->expects($this->once())
-            ->method('submit');
+            ->willReturn([]);
 
         $actual = $this->formService->addForm($this->mockForm)
             ->process($this->mockServerRequest);

@@ -18,11 +18,13 @@ class WhipException extends SlibException
     const BAD_SERVICE_REQUEST = 2;
     const FORM_NOT_FOUND = 3;
     const BAD_SESSION_DECODE = 4;
+    const FORM_OVERWRITE = 5;
 
     protected static $errorMap = [
         self::BAD_TPL_DIR => 'The directory does not exists: "%s"',
         self::BAD_SERVICE_REQUEST => 'Request to %s failed because: %s.',
         self::FORM_NOT_FOUND => 'Could not find form "%s".',
-        self::BAD_SESSION_DECODE => 'Unable to pull and decode session key "%s".'
+        self::BAD_SESSION_DECODE => 'Unable to pull and decode session key "%s".',
+        self::FORM_OVERWRITE => 'Attempt to overwrite form "%s".'
     ];
 }

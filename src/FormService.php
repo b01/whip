@@ -36,9 +36,15 @@ abstract class FormService
      * @param \Whip\Form $form
      * @return \Whip\FormService
      */
-    public function addForm(Form $form) : \Whip\FormService
+    public function addForm(Form $form, $overwrite = false) : \Whip\FormService
     {
-        $this->forms[$form->getId()] = $form;
+        $formId = \call_user_func(\get_class($form) . '::getId');
+
+        if (\array_key_exists($formId, $this->forms) && !$overwrite) {
+            throw new WhipException(WhipException::FORM_OVERWRITE, [$formId]);
+        }
+
+        $this->forms[$formId] = $form;
 
         return $this;
     }
@@ -105,9 +111,9 @@ abstract class FormService
         if (!empty($form)) {
             $form->setInput($requestVars);
 
-            $form->canSubmit()
-                ? $form->submit()
-                : $form->getState();
+            if ($form->canSubmit()) {
+                $form->submit();
+            }
         }
 
         return $form;
