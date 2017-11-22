@@ -5,9 +5,9 @@
  * this file are reserved by Khalifah Khalil Shabazz
  */
 
-use Kshabazz\Slib\Tools\Utilities;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Whip\Session;
 
 /**
  * Class Controller
@@ -16,7 +16,7 @@ use Psr\Http\Message\ServerRequestInterface;
  */
 abstract class Controller
 {
-    use Utilities;
+    use Session;
 
     /** @var \Psr\Http\Message\ServerRequestInterface */
     protected $request;

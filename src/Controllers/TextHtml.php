@@ -6,6 +6,7 @@
  */
 
 use Kshabazz\Slib\StringStream;
+use Kshabazz\Slib\Tools\Utilities;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Whip\FormService;
@@ -18,6 +19,8 @@ use Whip\View;
  */
 abstract class TextHtml extends Controller
 {
+    use Utilities;
+
     /** @var array A list of form models to pass to the render engine. */
     protected $forms;
 
