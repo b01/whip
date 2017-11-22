@@ -17,7 +17,7 @@ use Whip\View;
 final class TextHtmlTest extends TestCase
 {
     /** @var \Whip\Controllers\TextHtml|\PHPUnit_Framework_MockObject_MockObject */
-    private $htmlController;
+    private $sut;
 
     /** @var \Psr\Http\Message\ServerRequestInterface|\PHPUnit_Framework_MockObject_MockObject */
     private $mockFormService;
@@ -38,7 +38,7 @@ final class TextHtmlTest extends TestCase
         $this->mockResponse = $this->createMock(ResponseInterface::class);
         $this->mockView = $this->createMock(View::class);
 
-        $this->htmlController = $this->getMockForAbstractClass(
+        $this->sut = $this->getMockForAbstractClass(
             TextHtml::class,
             [
                 $this->mockRequest,
@@ -53,7 +53,7 @@ final class TextHtmlTest extends TestCase
      */
     public function testCanInitialize()
     {
-        $this->assertInstanceOf(TextHtml::class, $this->htmlController);
+        $this->assertInstanceOf(TextHtml::class, $this->sut);
     }
 
     /**
@@ -85,7 +85,7 @@ final class TextHtmlTest extends TestCase
             ->method('getRenderData')
             ->willReturn([]);
 
-        $actual = $this->htmlController->render($this->mockView);
+        $actual = $this->sut->render($this->mockView);
 
         $this->assertEquals($this->mockResponse, $actual);
     }
@@ -128,7 +128,7 @@ final class TextHtmlTest extends TestCase
             ->method('getRenderData')
             ->willReturn([]);
 
-        $this->htmlController->render($this->mockView);
+        $this->sut->render($this->mockView);
     }
 
     /**
@@ -167,51 +167,38 @@ final class TextHtmlTest extends TestCase
             ->method('getRenderData')
             ->willReturn([]);
 
-        $this->htmlController->render($this->mockView);
+        $this->sut->render($this->mockView);
     }
 
     /**
-     * @covers ::redirectTo
+     * @covers ::withForms
      * @uses \Whip\Controllers\TextHtml::__construct
+     * @uses \Whip\Controllers\TextHtml::render
      */
-    public function testCanPerformARedirect()
+    public function testCanAddForms()
     {
-        $mockUri = $this->createMock(UriInterface::class);
-        $mockUri->expects($this->once())
-            ->method('__toString')
-            ->willReturn('test');
-
-        $mockUri->expects($this->once())
-            ->method('withPort')
-            ->with(443)
-            ->willReturnSelf();
-
-        $mockUri->expects($this->once())
-            ->method('withScheme')
-            ->with('https')
-            ->willReturnSelf();
-
-        $mockUri->expects($this->once())
-            ->method('withPath')
-            ->with('/test')
-            ->willReturnSelf();
-
-        $this->mockResponse->expects($this->once())
-            ->method('withStatus')
-            ->with(302)
-            ->willReturnSelf();
-
-        $this->mockResponse->expects($this->once())
-            ->method('withHeader')
-            ->with($this->identicalTo('Location'), $this->identicalTo('test'))
-            ->willReturnSelf();
+        $this->mockRequest->expects($this->once())
+            ->method('getParsedBody')
+            ->willReturn(['test'=> '1234<>']);
 
         $this->mockRequest->expects($this->once())
-            ->method('getUri')
-            ->willReturn($mockUri);
+            ->method('getQueryParams')
+            ->willReturn([]);
 
-        $actual = $this->htmlController->redirectTo(302, '/test');
+        $this->mockView->expects($this->any())
+            ->method('addData')
+            ->willReturnSelf();
 
-        $this->assertEquals($this->mockResponse, $actual);
+        $this->mockResponse->expects($this->once())
+            ->method('withBody')
+            ->willReturn($this->mockResponse);
+
+        $fixture = ['testForm'];
+        $this->mockFormService->expects($this->once())
+            ->method('getRenderData')
+            ->with($this->equalTo($fixture));
+
+        $this->sut->withForms($fixture)
+            ->render($this->mockView);
     }
 }
