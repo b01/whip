@@ -6,7 +6,6 @@
  */
 
 use Kshabazz\Slib\StringStream;
-use Kshabazz\Slib\Tools\Utilities;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Whip\FormService;
@@ -19,27 +18,18 @@ use Whip\View;
  */
 abstract class TextHtml extends Controller
 {
-    use Utilities;
-
     /** @var array A list of form models to pass to the render engine. */
     protected $forms;
 
     /** @var \Whip\FormService */
     protected $formService;
 
-    /** @var \Psr\Http\Message\ServerRequestInterface */
-    protected $request;
-
-    /** @var \Psr\Http\Message\ResponseInterface */
-    protected $response;
-
     /**
-     * Html constructor.
+     * TextHtml constructor.
      *
      * @param \Psr\Http\Message\ServerRequestInterface $request
      * @param \Psr\Http\Message\ResponseInterface $response
-     * @param View $view
-     * @param FormService|null $formService
+     * @param \Whip\FormService|null $formService
      */
     public function __construct(
         ServerRequestInterface $request,
@@ -76,28 +66,6 @@ abstract class TextHtml extends Controller
         $this->response = $this->response->withBody($output);
 
         return $this->response;
-    }
-
-    /**
-     * Redirect to a specified URL.
-     *
-     * @param \Psr\Http\Message\UriInterface $url
-     * @param int $httpStatusCode
-     * @return \Psr\Http\Message\ResponseInterface;
-     */
-    public function redirectTo(
-        int $httpStatusCode,
-        string $route,
-        string $httpProtocol = 'https',
-        int $httpPort = 443
-    ) {
-        $uri = $this->request->getUri();
-        $newUri = $uri->withScheme($httpProtocol)
-            ->withPort($httpPort)
-            ->withPath($route);
-
-        return $this->response->withStatus($httpStatusCode)
-            ->withHeader('Location', (string) $newUri);
     }
 
     /**
