@@ -214,15 +214,4 @@ final class TextHtmlTest extends TestCase
 
         $this->assertEquals($this->mockResponse, $actual);
     }
-
-    /**
-     * @covers ::getResponse
-     * @uses \Whip\Controllers\TextHtml::__construct
-     */
-    public function testCanGetResponse()
-    {
-        $actual = $this->htmlController->getResponse();
-
-        $this->assertEquals($this->mockResponse, $actual);
-    }
 }

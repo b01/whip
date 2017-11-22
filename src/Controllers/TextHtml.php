@@ -49,14 +49,6 @@ abstract class TextHtml
     }
 
     /**
-     * @return \Psr\Http\Message\ResponseInterface
-     */
-    public function getResponse()
-    {
-        return $this->response;
-    }
-
-    /**
      * Build a response that will render the view (a.k.a the HTML).
      *
      * @return \Psr\Http\Message\ResponseInterface
