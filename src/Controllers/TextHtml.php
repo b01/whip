@@ -17,9 +17,12 @@ use Whip\View;
  *
  * @package \Whip\Controllers
  */
-abstract class TextHtml
+abstract class TextHtml extends Controller
 {
     use Utilities;
+
+    /** @var array A list of form models to pass to the render engine. */
+    protected $forms;
 
     /** @var \Whip\FormService */
     protected $formService;
@@ -46,6 +49,7 @@ abstract class TextHtml
         $this->request = $request;
         $this->response = $response;
         $this->formService = $formService;
+        $this->forms = [];
     }
 
     /**
@@ -63,7 +67,7 @@ abstract class TextHtml
 
         $view->addData('postVars', $postVars);
         $view->addData('queryVars', $getVars);
-        $view->addData('forms', $this->formService->getRenderData());
+        $view->addData('forms', $this->formService->getRenderData($this->forms));
 
         $html = $view->render();
 
@@ -94,5 +98,21 @@ abstract class TextHtml
 
         return $this->response->withStatus($httpStatusCode)
             ->withHeader('Location', (string) $newUri);
+    }
+
+    /**
+     * Add a list of form models you want to pass to the render engine.
+     *
+     * Adding forms here will pass them allong to the render engine. Allowing form values, error messages, etc to be
+     * shown in the response.
+     *
+     * @param array $forms
+     * @return \Whip\Controllers\TextHtml
+     */
+    public function withForms(array $forms)
+    {
+        $this->forms = $forms;
+
+        return $this;
     }
 }
