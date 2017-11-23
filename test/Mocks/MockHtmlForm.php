@@ -53,14 +53,6 @@ class MockHtmlForm extends HtmlForm
     /**
      * @inheritDoc
      */
-    public function getState(): int
-    {
-        return parent::getState();
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function setInput(array $requestVars): Form
     {
         return $this;

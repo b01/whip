@@ -82,15 +82,4 @@ class HtmlFormTest extends TestCase
 
         $this->assertTrue($actual);
     }
-
-    /**
-     * @covers ::getState
-     * @uses \Whip\HtmlForm::__construct
-     */
-    public function testCanGetState()
-    {
-        $actual = $this->sut->getState();
-
-        $this->assertEquals(HtmlForm::NOT_PROCESSED, $actual);
-    }
 }

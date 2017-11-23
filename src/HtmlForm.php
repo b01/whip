@@ -39,8 +39,6 @@ abstract class HtmlForm implements Form
         $this->validation = $validation;
 
         $this->input = [self::FORM_ID_KEY => static::getId()];
-
-        $this->state = static::NOT_PROCESSED;
     }
 
     /**
@@ -51,14 +49,6 @@ abstract class HtmlForm implements Form
         $this->input[self::FORM_ERRORS_KEY] = $this->validation->getErrors();
 
         return $this->input;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getState() : int
-    {
-        return $this->state;
     }
 
     /**

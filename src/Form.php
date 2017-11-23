@@ -7,14 +7,6 @@
  */
 interface Form
 {
-    const NOT_PROCESSED = 0;
-
-    const VALIDATED = 1;
-
-    const SUBMITTED = 2;
-
-    const INVALID = 3;
-
     /**
      * Get a unique identifier for this form.
      *
