@@ -14,11 +14,20 @@ use Whip\Lash\Validator;
  */
 abstract class HtmlForm implements Form
 {
-    /** Form ID key in the input array. */
-    const FORM_ID_KEY = 'formId';
+    /** @var string */
+    const FAILURE_REASON_KEY = 'failures';
 
-    /** Form errors key in the input array. */
+    /** Form ID key in the render data array. */
+    const FORM_ID_KEY = 'id';
+
+    /** Form input key in the render data array. */
+    const FORM_INPUT_KEY = 'input';
+
+    /** Form errors key in the render data array. */
     const FORM_ERRORS_KEY = 'errors';
+
+    /** @var array a list of failure reasons form submission failed. */
+    protected $failures;
 
     /** @var array Client form input. */
     protected $input;
@@ -37,19 +46,39 @@ abstract class HtmlForm implements Form
     public function __construct(Validator $validation)
     {
         $this->validation = $validation;
-
-        $this->input = [self::FORM_ID_KEY => static::getId()];
+        $this->failures = [];
     }
+
+    /**
+     * @inheritdoc
+     */
+    abstract public function getPostBackRouteInfo(): array;
 
     /**
      * @inheritdoc
      */
     public function getRenderData() : array
     {
-        $this->input[self::FORM_ERRORS_KEY] = $this->validation->getErrors();
-
-        return $this->input;
+        return [
+            self::FORM_ID_KEY => static::getId(),
+            self::FORM_INPUT_KEY => $this->input,
+            self::FORM_ERRORS_KEY => $this->validation->getErrors(),
+            self::FAILURE_REASON_KEY => $this->getFailures(),
+        ];
     }
+
+    /**
+     * @inheritdoc
+     */
+    public function getFailures(): array
+    {
+        return $this->failures;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    abstract public function getSubmitRouteInfo(): array;
 
     /**
      * @return bool
@@ -67,4 +96,16 @@ abstract class HtmlForm implements Form
      * @return array
      */
     abstract protected function getMessages() : array;
+
+    /**
+     * Set a failure reason
+     *
+     * @return HtmlForm
+     */
+    protected function setFailure(string $reason) : HtmlForm
+    {
+        $this->failures[] = $reason;
+
+        return $this;
+    }
 }

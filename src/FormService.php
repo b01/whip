@@ -17,39 +17,38 @@ abstract class FormService extends Controller
     /** @var \Whip\FormFactory */
     protected $factory;
 
-    /** @var array of \Whip\Form */
+    /** @var array List of \Whip\Form objects (keys are the form IDs). */
     protected $forms;
 
-    /** @var string */
+    /** @var string Form ID to indicate which form has posted. */
     protected $formSubmitField;
+
+    /** @var string Key prefix for form render data stored in the session. */
+    protected $sessionRenderDataKey;
 
     /**
      * FormService constructor.
      *
+     * @param ServerRequestInterface $request
+     * @param ResponseInterface $response
      * @param string $formSubmitField
+     * @param FormFactory $factory
+     * @param SessionWrapper $session
      */
     public function __construct(
+        ServerRequestInterface $request,
+        ResponseInterface $response,
         string $formSubmitField,
         FormFactory $factory,
-        ResponseInterface $response
+        SessionWrapper $session
     ) {
-        $this->forms = [];
+        parent::__construct($request, $response);
+
         $this->formSubmitField = $formSubmitField;
         $this->factory = $factory;
-        $this->response = $response;
-    }
-
-    /**
-     * Add a form to the service.
-     *
-     * @param \Whip\Form $form
-     * @return \Whip\FormService
-     */
-    public function addForm(string $fullClassName, callable $initializer, bool $overwrite = false) : FormService
-    {
-        $this->factory->set($fullClassName, $initializer, $overwrite);
-
-        return $this;
+        $this->forms = [];
+        $this->sessionRenderDataKey = __CLASS__ . ':renderData';
+        $this->session = $session;
     }
 
     /**
@@ -61,9 +60,17 @@ abstract class FormService extends Controller
     {
         $formData = [];
 
-        foreach ($formNames as $formName) {
-            $this->forms[$formName] = $this->factory->get($formName);
-            $formData[$formName] = $this->forms[$formName]->getRenderData();
+        foreach ($formNames as $formId) {
+            $sessionKey = $this->getFormKey($formId);
+            $sessionData = $this->session->getArray($sessionKey, null);
+            $noSessionData = empty($sessionData);
+
+            if ($noSessionData) {
+                $form = $this->factory->get($formId);
+                $formData[$formId] = $form->getRenderData();
+            } else {
+                $formData[$formId] = $sessionData;
+            }
         }
 
         return $formData;
@@ -93,34 +100,66 @@ abstract class FormService extends Controller
      * Try to process any form submitted by the client input in the request.
      *
      * @param \Psr\Http\Message\ServerRequestInterface $request
-     * @return \Whip\Form
-     * @exception When the form cannot be found.
+     * @return \Psr\Http\Message\ResponseInterface|null
+     * @exception When the form key is found, but the form was not.
      */
-    public function process(ServerRequestInterface $request) : ?Form
+    public function process() : ?ResponseInterface
     {
-        // TODO: Extract to separate function.
-        $requestVars = $this->getScrubbedInput($request);
-        $returnVal = null;
-
+        $response = null;
+        $formInput = $this->getScrubbedInput($this->request);
         // Find the submitted form.
-        $formId = $this->getSafeArray($this->formSubmitField, $requestVars);
+        $formId = $this->getSafeArray($this->formSubmitField, $formInput);
+        $form = $this->getForm($formId);
+
+        // Process the form.
+        if ($form instanceof Form) {
+            $form->setInput($formInput);
+
+            $routeInfo = $form->canSubmit() && $form->submit()
+                ? $form->getSubmitRouteInfo()
+                : $form->getPostBackRouteInfo();
+
+            $response = \call_user_func_array([$this, 'redirectTo'], $routeInfo);
+
+            $this->session->setArray(
+                $this->getFormKey($formId),
+                $form->getRenderData()
+            );
+        }
+
+        return $response;
+    }
+
+    /**
+     * Find and instantiate a form indicated in a request.
+     *
+     * @param string $formId
+     * @return null|Form
+     * @throws WhipException
+     */
+    private function getForm(string $formId) : ?Form
+    {
         $form = $this->factory->get($formId);
 
         // Form key was found but no form.
         if (!empty($formId) && empty($form)) {
-            throw new WhipException(WhipException::FORM_NOT_FOUND, [$this->formSubmitField]);
-        }
-        // TODO: End extraction.
-
-        // This check keeps an error from being thrown when no form key or form is found.
-        if (!empty($form)) {
-            $form->setInput($requestVars);
-
-            if ($form->canSubmit()) {
-                $form->submit();
-            }
+            throw new WhipException(
+                WhipException::FORM_NOT_FOUND,
+                [$this->formSubmitField]
+            );
         }
 
         return $form;
+    }
+
+    /**
+     * Get a form render data session key.
+     *
+     * @param string $formId
+     * @return string
+     */
+    private function getFormKey(string $formId) : string
+    {
+        return "{$this->sessionRenderDataKey}:{$formId}";
     }
 }

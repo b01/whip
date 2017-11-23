@@ -82,4 +82,14 @@ class HtmlFormTest extends TestCase
 
         $this->assertTrue($actual);
     }
+
+    /**
+     * @covers ::setFailure
+     * @covers ::getFailures
+     */
+    public function testCanSetAndGetFailures()
+    {
+        $actual = $this->sut->proxySetAndGetFailures(__FUNCTION__);
+        $this->assertEquals(__FUNCTION__, $actual[0]);
+    }
 }

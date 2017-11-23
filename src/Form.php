@@ -22,11 +22,32 @@ interface Form
     public function canSubmit() : bool;
 
     /**
+     * Get failure reasons.
+     *
+     * @return array A list of reason why form submission failed.
+     */
+    public function getFailures() : array;
+
+    /**
+     * Get route and http status code to redirect to when submission fails.
+     *
+     * @return array An array containing the http status code at index 0, and the route at index 1.
+     */
+    public function getPostBackRouteInfo() : array;
+
+    /**
      * Get data to pass to the template engine to aid rendering. For example, field value and errors.
      *
      * @return array
      */
     public function getRenderData() : array;
+
+    /**
+     * Get the route to redirect to when submission is a success.
+     *
+     * @return string
+     */
+    public function getSubmitRouteInfo() : array;
 
     /**
      * Clean the request variables by filtering each field, at least, through htmlspecialchars.
@@ -38,7 +59,7 @@ interface Form
     /**
      * Perform the submission.
      *
-     * @return mixed
+     * @return bool Returns TRUE indicating that the submission was a success, FALSE on failure.
      */
-    public function submit();
+    public function submit() : bool;
 }

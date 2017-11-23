@@ -95,4 +95,46 @@ class ControllerTest extends TestCase
 
         $this->assertEquals($this->mockResponse, $actual);
     }
+
+    /**
+     * @covers ::getHttpMessageBody
+     */
+    public function testCanSetResponseBodyWithAString()
+    {
+        $stream = $this->sut->getHttpMessageBody(__FUNCTION__);
+        $this->assertEquals(__FUNCTION__, (string)$stream);
+    }
+
+    /**
+     * @covers ::redirectTo
+     */
+    public function testCanCarryQueryStringWhenRedirectingToANewUrl()
+    {
+        $fixture = ['test' => __FUNCTION__];
+
+        $mockUri = $this->createMock(UriInterface::class);
+        $mockUri->expects($this->once())
+            ->method('withScheme')
+            ->willReturnSelf();
+        $mockUri->expects($this->once())
+            ->method('withPort')
+            ->willReturnSelf();
+        $mockUri->expects($this->once())
+            ->method('withPath')
+            ->willReturnSelf();
+        $mockUri->expects($this->once())
+            ->method('withQuery')
+            ->with(\http_build_query($fixture))
+            ->willReturnSelf();
+
+        $this->mockRequest->expects($this->once())
+            ->method('getUri')
+            ->willReturn($mockUri);
+
+        $this->mockResponse->expects($this->once())
+            ->method('withStatus')
+            ->willReturnSelf();
+
+        $this->sut->redirectTo(-1, '2fdafa', $fixture);
+    }
 }

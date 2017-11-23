@@ -43,11 +43,27 @@ class MockHtmlForm extends HtmlForm
     }
 
     /**
+     * @inheritdoc
+     */
+    public function getPostBackRouteInfo(): array
+    {
+        return [];
+    }
+
+    /**
      * @inheritDoc
      */
     public function getRenderData(): array
     {
         return parent::getRenderData();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getSubmitRouteInfo(): array
+    {
+        return [];
     }
 
     /**
@@ -61,9 +77,16 @@ class MockHtmlForm extends HtmlForm
     /**
      * @inheritDoc
      */
-    public function submit()
+    public function submit() : bool
     {
-        return $this;
+        return '';
+    }
+
+    public function proxySetAndGetFailures(string $failure)
+    {
+        $this->setFailure($failure);
+
+        return $this->getFailures();
     }
 
 }

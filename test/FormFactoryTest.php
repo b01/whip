@@ -31,6 +31,7 @@ class FormFactoryTest extends TestCase
 
     /**
      * @covers ::set
+     * @covers ::isWhipForm
      * @covers ::get
      * @use \Whip\FormFactory::__construct
      */
@@ -47,5 +48,46 @@ class FormFactoryTest extends TestCase
         $actual = $sut->get(MockHtmlForm::getId());
 
         $this->assertEquals($fixtureForm, $actual);
+    }
+
+    /**
+     * @covers ::get
+     * @expectedException \Whip\WhipException
+     * @use \Whip\FormFactory::__construct
+     * @use \Whip\FormFactory::set
+     * @use \Whip\FormFactory::isWhipForm
+     */
+    public function testWillThrowAnExceptionWhenFormInitializerReturnOtherThanWhipForm()
+    {
+        $sut = new FormFactory();
+        $mockValidator = $this->createMock(Validator::class);
+        $fixtureForm = new MockHtmlForm($mockValidator);
+
+        $sut->set(MockHtmlForm::class, function () use($fixtureForm) {
+            return '';
+        });
+
+        $actual = $sut->get(MockHtmlForm::getId());
+    }
+
+    /**
+     * @covers ::set
+     * @expectedException \Whip\WhipException
+     * @use \Whip\FormFactory::__construct
+     * @use \Whip\FormFactory::isWhipForm
+     */
+    public function testWillThrowAnExceptionWhenAttemptToOverwriteExistingFormWithoutPermission()
+    {
+        $sut = new FormFactory();
+        $mockValidator = $this->createMock(Validator::class);
+        $fixtureForm = new MockHtmlForm($mockValidator);
+
+        $sut->set(MockHtmlForm::class, function () use($fixtureForm) {
+            return $fixtureForm;
+        });
+
+        $sut->set(MockHtmlForm::class, function () use($fixtureForm) {
+            return $fixtureForm;
+        });
     }
 }

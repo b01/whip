@@ -20,9 +20,9 @@ trait Session
      * @param null $default
      * @return mixed|null
      */
-    public function getArrayFromSession($key, $default = null)
+    public function getArray($key, $default = null)
     {
-        $encoded = $this->getSessionVal($key, $default);
+        $encoded = $this->getVal($key, $default);
 
         // Restore the array.
         try {
@@ -40,7 +40,7 @@ trait Session
      * @param mixed $default
      * @return mixed
      */
-    public function getSessionVal(string $key, $default = null)
+    public function getVal(string $key, $default = null)
     {
         $value = $default;
 
@@ -57,7 +57,7 @@ trait Session
      * @return static
      * @throws \Exception
      */
-    public function setSessionVal(string $key, $value)
+    public function setVal(string $key, $value)
     {
         if (\is_object($value)) {
             throw new \Exception('Do not add objects to the session.');
@@ -75,11 +75,11 @@ trait Session
      * @param array $value
      * @return static
      */
-    public function setArrayInSession(string $key, array $value)
+    public function setArray(string $key, array $value)
     {
         $encoded = \json_encode($value);
 
-        $this->setSessionVal($key, $encoded);
+        $this->setVal($key, $encoded);
 
         return $this;
     }

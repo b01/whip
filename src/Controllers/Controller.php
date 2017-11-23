@@ -5,6 +5,7 @@
  * this file are reserved by Khalifah Khalil Shabazz
  */
 
+use Kshabazz\Slib\StringStream;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Whip\Session;
@@ -39,6 +40,15 @@ abstract class Controller
     }
 
     /**
+     * @param string $body
+     * @return \Kshabazz\Slib\StringStream
+     */
+    public function getHttpMessageBody(string $body)
+    {
+        return new StringStream($body);
+    }
+
+    /**
      * Redirect to a specified URL.
      *
      * @param \Psr\Http\Message\UriInterface $url
@@ -48,6 +58,7 @@ abstract class Controller
     public function redirectTo(
         int $httpStatusCode,
         string $route,
+        array $query = null,
         string $httpProtocol = 'https',
         int $httpPort = 443
     ) {
@@ -55,6 +66,10 @@ abstract class Controller
         $newUri = $uri->withScheme($httpProtocol)
             ->withPort($httpPort)
             ->withPath($route);
+
+        if (\is_array($query)) {
+            $newUri = $newUri->withQuery(\http_build_query($query));
+        }
 
         return $this->response->withStatus($httpStatusCode)
             ->withHeader('Location', (string) $newUri);

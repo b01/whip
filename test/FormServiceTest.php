@@ -8,10 +8,12 @@
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\UriInterface;
 use Whip\Form;
 use Whip\FormFactory;
 use Whip\FormService;
 use Whip\Lash\Validator;
+use Whip\SessionWrapper;
 use Whip\Test\Mocks\MockHtmlForm;
 
 /**
@@ -37,11 +39,14 @@ class FormServiceTest extends TestCase
     /** @var \Whip\FormFactory|\PHPUnit_Framework_MockObject_MockObject */
     private $mockFormFactory;
 
-    /** @var \Psr\Http\Message\ResponseInterface */
+    /** @var \Psr\Http\Message\ResponseInterface|\PHPUnit_Framework_MockObject_MockObject */
     private $mockResponse;
 
     /** @var \Psr\Http\Message\ServerRequestInterface|\PHPUnit_Framework_MockObject_MockObject */
     private $mockServerRequest;
+
+    /** @var \Whip\SessionWrapper|\PHPUnit_Framework_MockObject_MockObject */
+    private $mockSession;
 
     /** @var \Whip\Lash\Validator|\PHPUnit_Framework_MockObject_MockObject */
     private $mockValidator;
@@ -52,9 +57,16 @@ class FormServiceTest extends TestCase
         $this->formSubmitField = 'testName';
         $this->mockFormFactory = $this->createMock(FormFactory::class);
         $this->mockResponse = $this->createMock(ResponseInterface::class);
+        $this->mockSession = $this->createMock(SessionWrapper::class);
         $this->sut = $this->getMockForAbstractClass(
             FormService::class,
-            [$this->formSubmitField, $this->mockFormFactory, $this->mockResponse]
+            [
+                $this->mockServerRequest,
+                $this->mockResponse,
+                $this->formSubmitField,
+                $this->mockFormFactory,
+                $this->mockSession
+            ]
         );
         $this->mockValidator = $this->createMock(Validator::class);
         $this->mockForm = $this->createMock(Form::class);
@@ -70,43 +82,68 @@ class FormServiceTest extends TestCase
     }
 
     /**
-     * @covers ::addForm
+     * @covers ::getForm
      * @uses \Whip\FormService::process
      */
     public function testCanAddAForm()
     {
-        $fixtureName = MockHtmlForm::getId();
+        $formIdFixture = MockHtmlForm::getId();
+        $routeInfoFixture = [1234, 'test'];
+        $mockUri = $this->createMock(UriInterface::class);
 
         $this->mockServerRequest->expects($this->once())
             ->method('getQueryParams')
-            ->willReturn([$this->formSubmitField => $fixtureName]);
+            ->willReturn([$this->formSubmitField => $formIdFixture]);
 
         $this->mockServerRequest->expects($this->once())
             ->method('getUploadedFiles')
-            ->willReturn([$this->formSubmitField => $fixtureName]);
+            ->willReturn([$this->formSubmitField => $formIdFixture]);
 
-        $closureFixture = function (){};
-        $this->mockFormFactory->expects($this->once())
-            ->method('set')
-            ->with(MockHtmlForm::class, $closureFixture, false);
+        $this->mockServerRequest->expects($this->once())
+            ->method('getUri')
+            ->willReturn($mockUri);
+
+        $mockUri->expects($this->once())
+            ->method('withScheme')
+            ->willReturnSelf();
+
+        $mockUri->expects($this->once())
+            ->method('withPort')
+            ->willReturnSelf();
+
+        $mockUri->expects($this->once())
+            ->method('withPath')
+            ->with('test')
+            ->willReturn('');
+
+        $this->mockResponse->expects($this->once())
+            ->method('withStatus')
+            ->willReturnSelf();
+
+        $this->mockResponse->expects($this->once())
+            ->method('withHeader')
+            ->willReturnSelf();
+
+        $this->mockForm->expects($this->once())
+            ->method('getPostBackRouteInfo')
+            ->willReturn($routeInfoFixture);
 
         $this->mockFormFactory->expects($this->once())
             ->method('get')
             ->with(MockHtmlForm::getId())
             ->willReturn($this->mockForm);
 
-        $this->sut->addForm(MockHtmlForm::class, $closureFixture)
-            ->process($this->mockServerRequest);
+        $this->sut->process();
     }
 
     /**
      * @covers ::getRenderData
-     * @uses \Whip\FormService::addForm
+     * @uses \Whip\Form::getRenderData
+     * @uses \Whip\FormFactory::set
      */
     public function testCanGetRenderData()
     {
         $formNameFixture = MockHtmlForm::getId();
-        $closureFixture = function (){};
         $expected = [__FUNCTION__];
 
         $this->mockForm->expects($this->once())
@@ -118,8 +155,7 @@ class FormServiceTest extends TestCase
             ->with($formNameFixture)
             ->willReturn($this->mockForm);
 
-        $actual = $this->sut->addForm(MockHtmlForm::class, $closureFixture)
-            ->getRenderData([$formNameFixture]);
+        $actual = $this->sut->getRenderData([$formNameFixture]);
 
         $this->assertEquals($expected[0], $actual[$formNameFixture][0]);
     }
@@ -127,37 +163,75 @@ class FormServiceTest extends TestCase
     /**
      * @covers ::process
      * @covers ::getScrubbedInput
-     * @uses \Whip\FormService::addForm
+     * @uses \Whip\FormService::__construct
+     * @uses \Whip\FormService::getForm
+     * @uses \Whip\Controllers\Controller::__construct
+     * @uses \Whip\Controllers\Controller::redirectTo
      */
     public function testCanAddAndProcessAndGetTheSubmittedForm()
     {
-        $fixtureName = MockHtmlForm::getId();
+        $formIdFixture = MockHtmlForm::getId();
+        $mockUri = $this->createMock(UriInterface::class);
 
         $this->mockServerRequest->expects($this->once())
             ->method('getQueryParams')
-            ->willReturn([$this->formSubmitField => $fixtureName]);
+            ->willReturn([$this->formSubmitField => $formIdFixture]);
 
         $this->mockServerRequest->expects($this->once())
             ->method('getUploadedFiles')
             ->willReturn([]);
 
+        $this->mockServerRequest->expects($this->once())
+            ->method('getUri')
+            ->willReturn($mockUri);
+
+        $mockUri->expects($this->once())
+            ->method('withScheme')
+            ->willReturnSelf();
+
+        $mockUri->expects($this->once())
+            ->method('withPort')
+            ->willReturnSelf();
+
+        $mockUri->expects($this->once())
+            ->method('withPath')
+            ->with('test')
+            ->willReturn('');
+
+        $this->mockResponse->expects($this->once())
+            ->method('withStatus')
+            ->willReturnSelf();
+
+        $this->mockResponse->expects($this->once())
+            ->method('withHeader')
+            ->willReturnSelf();
+
         $this->mockFormFactory->expects($this->once())
             ->method('get')
-            ->with($this->equalTo($fixtureName))
+            ->with($this->equalTo($formIdFixture))
             ->willReturn($this->mockForm);
 
         $this->mockForm->expects($this->once())
             ->method('canSubmit')
             ->willReturn(true);
 
-        $actual = $this->sut->process($this->mockServerRequest);
+        $this->mockForm->expects($this->once())
+            ->method('submit')
+            ->willReturn(true);
 
-        $this->assertEquals($this->mockForm, $actual);
+        $this->mockForm->expects($this->once())
+            ->method('getSubmitRouteInfo')
+            ->willReturn([1234, 'test']);
+
+        $actual = $this->sut->process();
+
+        $this->assertEquals($this->mockResponse, $actual);
     }
 
     /**
-     * @covers ::process
-     * @covers ::getScrubbedInput
+     * @covers ::getForm
+     * @uses \Whip\FormService::process
+     * @uses \Whip\FormService::getScrubbedInput
      * @expectedException \Whip\WhipException
      */
     public function testWillThrowAnExceptionWhenFormNotFound()
@@ -170,6 +244,162 @@ class FormServiceTest extends TestCase
             ->method('getUploadedFiles')
             ->willReturn([]);
 
-        $this->sut->process($this->mockServerRequest);
+        $this->sut->process();
+    }
+
+    /**
+     * @covers ::process
+     * @covers ::getFormKey
+     * @uses \Whip\FormService::__construct
+     * @uses \Whip\FormService::getScrubbedInput
+     * @uses \Whip\FormService::getForm
+     * @uses \Whip\FormService::getScrubbedInput
+     * @uses \Whip\Controllers\Controller::__construct
+     * @uses \Whip\Controllers\Controller::redirectTo
+     */
+    public function testWillPerform307RedirectOnFormFailure()
+    {
+        $formIdFixture = MockHtmlForm::getId();
+        $mockUri = $this->createMock(UriInterface::class);
+
+        $this->mockServerRequest->expects($this->once())
+            ->method('getQueryParams')
+            ->willReturn([$this->formSubmitField => $formIdFixture]);
+
+        $this->mockServerRequest->expects($this->once())
+            ->method('getUploadedFiles')
+            ->willReturn([]);
+
+        $this->mockServerRequest->expects($this->once())
+            ->method('getUri')
+            ->willReturn($mockUri);
+
+        $mockUri->expects($this->once())
+            ->method('withScheme')
+            ->willReturnSelf();
+
+        $mockUri->expects($this->once())
+            ->method('withPort')
+            ->willReturnSelf();
+
+        $mockUri->expects($this->once())
+            ->method('withPath')
+            ->with('/test')
+            ->willReturnSelf();
+
+        $this->mockResponse->expects($this->once())
+            ->method('withStatus')
+            ->willReturnSelf();
+
+        $this->mockFormFactory->expects($this->once())
+            ->method('get')
+            ->with($this->equalTo($formIdFixture))
+            ->willReturn($this->mockForm);
+
+        $this->mockForm->expects($this->once())
+            ->method('canSubmit')
+            ->willReturn(false);
+
+        $this->mockForm->expects($this->once())
+            ->method('getPostBackRouteInfo')
+            ->willReturn([307, '/test']);
+
+        $this->mockResponse->expects($this->once())
+            ->method('withHeader')
+            ->withConsecutive($this->equalTo('Location'), $this->equalTo(''))
+            ->willReturnSelf();
+
+        $this->mockSession->expects($this->once())
+            ->method('setArray')
+            ->with(
+                $this->equalTo('Whip\\FormService:renderData:form-mock'),
+                []
+            );
+
+        $this->sut->process();
+    }
+
+    /**
+     * @covers ::process
+     * @uses \Whip\FormService::__construct
+     * @uses \Whip\FormService::getScrubbedInput
+     * @uses \Whip\FormService::getForm
+     * @uses \Whip\FormService::getScrubbedInput
+     * @uses \Whip\FormService::getFormKey
+     * @uses \Whip\Controllers\Controller::__construct
+     * @uses \Whip\Controllers\Controller::redirectTo
+     */
+    public function testWillSetPostInSessionBeforeRedirect()
+    {
+        $formIdFixture = MockHtmlForm::getId();
+        $routeFixture = [307, __FUNCTION__];
+
+        $this->mockServerRequest->expects($this->once())
+            ->method('getQueryParams')
+            ->willReturn([]);
+        $this->mockServerRequest->expects($this->once())
+            ->method('getUploadedFiles')
+            ->willReturn([]);
+        $this->mockServerRequest->expects($this->once())
+            ->method('getParsedBody')
+            ->willReturn([$this->formSubmitField => $formIdFixture]);
+
+        $this->mockFormFactory->expects($this->once())
+            ->method('get')
+            ->with($this->equalTo($formIdFixture))
+            ->willReturn($this->mockForm);
+
+        $this->mockForm->expects($this->once())
+            ->method('getPostBackRouteInfo')
+            ->willReturn($routeFixture);
+
+        $mockUri = $this->createMock(UriInterface::class);
+        $mockUri->expects($this->once())
+            ->method('withScheme')
+            ->willReturnSelf();
+        $mockUri->expects($this->once())
+            ->method('withPort')
+            ->willReturnSelf();
+        $mockUri->expects($this->once())
+            ->method('withPath')
+            ->willReturnSelf();
+
+        $this->mockServerRequest->expects($this->once())
+            ->method('getUri')
+            ->willReturn($mockUri);
+
+        $this->mockResponse->expects($this->once())
+            ->method('withStatus')
+            ->willReturnSelf();
+        $this->mockResponse->expects($this->once())
+            ->method('withHeader')
+            ->willReturnSelf();
+
+        $this->mockSession->expects($this->once())
+            ->method('setArray')
+            ->with(
+                $this->equalTo('Whip\\FormService:renderData:' . $formIdFixture),
+                $this->equalTo([])
+            );
+
+        $this->sut->process();
+    }
+
+    /**
+     * @covers ::process
+     * @uses \Whip\FormService::__construct
+     * @uses \Whip\FormService::getForm
+     * @uses \Whip\FormService::getFormKey
+     */
+    public function testWillGetRenderDataFromFormWhenNonInSession()
+    {
+        $formIdFixture = MockHtmlForm::getId();
+
+        $this->mockFormFactory->expects($this->once())
+            ->method('get')
+            ->with($this->equalTo($formIdFixture))
+            ->willReturn($this->mockForm);
+
+        $this->sut->getRenderData([$formIdFixture]);
     }
 }

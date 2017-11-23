@@ -8,6 +8,8 @@
 
 use Whip\Session;
 use PHPUnit\Framework\TestCase;
+use Whip\SessionWrapper;
+use Whip\Test\Mocks\MockSession;
 
 /**
  * Class SessionTest
@@ -26,46 +28,46 @@ class SessionTest extends TestCase
     }
 
     /**
-     * @covers ::getSessionVal
+     * @covers ::getVal
      */
     public function testGetWithoutSettingWillReturnDefault()
     {
         $fixture = 'test';
 
-        $actual = $this->sut->getSessionVal($fixture, '1234');
+        $actual = $this->sut->getVal($fixture, '1234');
 
         $this->assertEquals('1234', $actual);
     }
 
     /**
-     * @covers ::setSessionVal
-     * @uses \Whip\Session::getSessionVal
+     * @covers ::setVal
+     * @uses \Whip\Session::getVal
      */
     public function testSet()
     {
         $key = 'test';
 
-        $this->sut->setSessionVal($key, '1234');
-        $actual = $this->sut->getSessionVal($key);
+        $this->sut->setVal($key, '1234');
+        $actual = $this->sut->getVal($key);
 
         $this->assertEquals('1234', $actual);
     }
 
     /**
-     * @covers ::setSessionVal
+     * @covers ::setVal
      * @expectedException \Exception
      */
     public function testSetThrowsAnException()
     {
-        $this->sut->setSessionVal('test', new \stdClass());
+        $this->sut->setVal('test', new \stdClass());
     }
 
     /**
-     * @covers ::setSessionVal
+     * @covers ::setVal
      */
     public function testSuccessfullySetsValueInTheGlobalSessionArray()
     {
-        $this->sut->setSessionVal('test', '1234');
+        $this->sut->setVal('test', '1234');
 
         $actual = $_SESSION['test'];
 
@@ -73,66 +75,82 @@ class SessionTest extends TestCase
     }
 
     /**
-     * @covers ::getSessionVal
+     * @covers ::getVal
      */
     public function testSuccessfullySetsValueInTheGlobalSessionArrayAndGetIt()
     {
-        $this->sut->setSessionVal('test', '1234');
+        $this->sut->setVal('test', '1234');
 
-        $actual = $this->sut->getSessionVal('test');
+        $actual = $this->sut->getVal('test');
 
         $this->assertEquals('1234', $actual);
     }
 
     /**
-     * @covers ::getArrayFromSession
+     * @covers ::getArray
      * @expectedException \Whip\WhipException
      */
     public function testWillFailToGetAnUnencodedArrayFromSession()
     {
         $_SESSION['sdfsd'] = ['oe'=>''];
 
-        $this->sut->getArrayFromSession('sdfsd');
+        $this->sut->getArray('sdfsd');
     }
 
     /**
-     * @covers ::getArrayFromSession
+     * @covers ::getArray
      */
     public function testGetArrayFromSessionWillDefaultToNullWhenNotSetInSession()
     {
         unset($_SESSION['tkjhtest']);
 
-        $actual = $this->sut->getArrayFromSession('tkjhtest');
+        $actual = $this->sut->getArray('tkjhtest');
 
         $this->assertNull($actual);
     }
 
     /**
-     * @covers ::getArrayFromSession
+     * @covers ::getArray
      */
     public function testCanGetArrayFromSession()
     {
         $fixture = ['er' => 123];
         $_SESSION['zxcv'] = \json_encode($fixture);
 
-        $actual = $this->sut->getArrayFromSession('zxcv');
+        $actual = $this->sut->getArray('zxcv');
 
         $this->assertSame($fixture, $actual);
     }
 
     /**
-     * @covers ::setArrayInSession
-     * @uses \Whip\SessionWrapper::getArrayFromSession
+     * @covers ::setArray
+     * @uses \Whip\SessionWrapper::getArray
      */
-    public function testCanSGetArrayFromSession()
+    public function testCanSetArrayFromSession()
     {
         $fixtureKey = '123test';
         $fixture = ['er' => 123];
 
-        $this->sut->setArrayInSession($fixtureKey, $fixture);
+        $this->sut->setArray($fixtureKey, $fixture);
 
-        $actual = $this->sut->getArrayFromSession($fixtureKey);
+        $actual = $this->sut->getArray($fixtureKey);
 
         $this->assertSame($fixture, $actual);
+    }
+
+    /**
+     * @covers ::withSession
+     */
+    public function testWithSessionMethod()
+    {
+        $sut = $this->createMock(SessionWrapper::class);
+
+        $sessionUser = new MockSession();
+
+        $sessionUser->withSession($sut);
+
+        $actual = $sessionUser->getSession();
+
+        $this->assertSame($sut, $actual);
     }
 }

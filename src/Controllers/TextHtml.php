@@ -32,12 +32,12 @@ abstract class TextHtml extends Controller
      *
      * @param \Psr\Http\Message\ServerRequestInterface $request
      * @param \Psr\Http\Message\ResponseInterface $response
-     * @param \Whip\FormService|null $formService
+     * @param \Whip\FormService $formService
      */
     public function __construct(
         ServerRequestInterface $request,
         ResponseInterface $response,
-        FormService $formService = null
+        FormService $formService
     ) {
         $this->request = $request;
         $this->response = $response;
@@ -64,7 +64,7 @@ abstract class TextHtml extends Controller
 
         $html = $view->render();
 
-        $output = new StringStream($html);
+        $output = $this->getHttpMessageBody($html);
 
         $this->response = $this->response->withBody($output);
 
