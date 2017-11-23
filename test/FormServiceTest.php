@@ -5,8 +5,8 @@
  * this file are reserved by Khalifah Khalil Shabazz
  */
 
-use function foo\func;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Whip\Form;
 use Whip\FormFactory;
@@ -37,6 +37,9 @@ class FormServiceTest extends TestCase
     /** @var \Whip\FormFactory|\PHPUnit_Framework_MockObject_MockObject */
     private $mockFormFactory;
 
+    /** @var \Psr\Http\Message\ResponseInterface */
+    private $mockResponse;
+
     /** @var \Psr\Http\Message\ServerRequestInterface|\PHPUnit_Framework_MockObject_MockObject */
     private $mockServerRequest;
 
@@ -48,9 +51,10 @@ class FormServiceTest extends TestCase
         $this->mockServerRequest = $this->createMock(ServerRequestInterface::class);
         $this->formSubmitField = 'testName';
         $this->mockFormFactory = $this->createMock(FormFactory::class);
+        $this->mockResponse = $this->createMock(ResponseInterface::class);
         $this->sut = $this->getMockForAbstractClass(
             FormService::class,
-            [$this->formSubmitField, $this->mockFormFactory]
+            [$this->formSubmitField, $this->mockFormFactory, $this->mockResponse]
         );
         $this->mockValidator = $this->createMock(Validator::class);
         $this->mockForm = $this->createMock(Form::class);

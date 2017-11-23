@@ -1,14 +1,16 @@
 <?php namespace Whip;
 
 use Kshabazz\Slib\Tools\Utilities;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Whip\Controllers\Controller;
 
 /**
  * Class FormService
  *
  * @package \Whip
  */
-abstract class FormService
+abstract class FormService extends Controller
 {
     use Utilities;
 
@@ -28,11 +30,13 @@ abstract class FormService
      */
     public function __construct(
         string $formSubmitField,
-        FormFactory $factory
+        FormFactory $factory,
+        ResponseInterface $response
     ) {
         $this->forms = [];
         $this->formSubmitField = $formSubmitField;
         $this->factory = $factory;
+        $this->response = $response;
     }
 
     /**
