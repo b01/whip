@@ -37,6 +37,6 @@ class HtmlViewTest extends TestCase
             ->method('addData')
             ->with($this->equalTo('title'), $this->equalTo('test'));
 
-        $htmlView->__construct('test', $this->mockRenderer);
+        $htmlView->__construct($this->mockRenderer, 'test');
     }
 }

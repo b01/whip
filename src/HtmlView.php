@@ -18,7 +18,7 @@ abstract class HtmlView extends View
     /**
      * @inheritdoc
      */
-    public function __construct(string $title, Renderer $renderer)
+    public function __construct(Renderer $renderer, string $title = null)
     {
         parent::__construct($renderer);
 
