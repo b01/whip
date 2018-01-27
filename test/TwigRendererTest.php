@@ -1,4 +1,4 @@
-<?php namespace Whip\Tests;
+<?php namespace Whip\Test;
 
 /**
  * Please see the included LICENSE.txt with this source code. If no

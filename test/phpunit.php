@@ -1,4 +1,4 @@
-<?php namespace Whip\Tests;
+<?php namespace Whip\Test;
 /**
  * Unit Tests configuration and setup.
  */

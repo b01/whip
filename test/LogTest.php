@@ -1,4 +1,4 @@
-<?php namespace Whip\Tests;
+<?php namespace Whip\Test;
 
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;

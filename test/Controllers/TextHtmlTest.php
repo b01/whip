@@ -1,4 +1,4 @@
-<?php namespace Whip\Tests\Controllers;
+<?php namespace Whip\Test\Controllers;
 
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
