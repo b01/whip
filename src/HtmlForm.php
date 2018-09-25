@@ -14,9 +14,6 @@ use Whip\Lash\Validator;
  */
 abstract class HtmlForm implements Form
 {
-    /** @var string */
-    const FAILURE_REASON_KEY = 'failures';
-
     /** Form ID key in the render data array. */
     const FORM_ID_KEY = 'id';
 
@@ -63,7 +60,6 @@ abstract class HtmlForm implements Form
             self::FORM_ID_KEY => static::getId(),
             self::FORM_INPUT_KEY => $this->input,
             self::FORM_ERRORS_KEY => $this->validation->getErrors(),
-            self::FAILURE_REASON_KEY => $this->getFailures(),
         ];
     }
 
