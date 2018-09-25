@@ -99,35 +99,6 @@ class FormServiceTest extends TestCase
             ->method('getUploadedFiles')
             ->willReturn([$this->formSubmitField => $formIdFixture]);
 
-        $this->mockServerRequest->expects($this->once())
-            ->method('getUri')
-            ->willReturn($mockUri);
-
-        $mockUri->expects($this->once())
-            ->method('withScheme')
-            ->willReturnSelf();
-
-        $mockUri->expects($this->once())
-            ->method('withPort')
-            ->willReturnSelf();
-
-        $mockUri->expects($this->once())
-            ->method('withPath')
-            ->with('test')
-            ->willReturn('');
-
-        $this->mockResponse->expects($this->once())
-            ->method('withStatus')
-            ->willReturnSelf();
-
-        $this->mockResponse->expects($this->once())
-            ->method('withHeader')
-            ->willReturnSelf();
-
-        $this->mockForm->expects($this->once())
-            ->method('getPostBackRouteInfo')
-            ->willReturn($routeInfoFixture);
-
         $this->mockFormFactory->expects($this->once())
             ->method('get')
             ->with(MockHtmlForm::getId())
@@ -181,31 +152,6 @@ class FormServiceTest extends TestCase
             ->method('getUploadedFiles')
             ->willReturn([]);
 
-        $this->mockServerRequest->expects($this->once())
-            ->method('getUri')
-            ->willReturn($mockUri);
-
-        $mockUri->expects($this->once())
-            ->method('withScheme')
-            ->willReturnSelf();
-
-        $mockUri->expects($this->once())
-            ->method('withPort')
-            ->willReturnSelf();
-
-        $mockUri->expects($this->once())
-            ->method('withPath')
-            ->with('test')
-            ->willReturn('');
-
-        $this->mockResponse->expects($this->once())
-            ->method('withStatus')
-            ->willReturnSelf();
-
-        $this->mockResponse->expects($this->once())
-            ->method('withHeader')
-            ->willReturnSelf();
-
         $this->mockFormFactory->expects($this->once())
             ->method('get')
             ->with($this->equalTo($formIdFixture))
@@ -217,11 +163,7 @@ class FormServiceTest extends TestCase
 
         $this->mockForm->expects($this->once())
             ->method('submit')
-            ->willReturn(true);
-
-        $this->mockForm->expects($this->once())
-            ->method('getSubmitRouteInfo')
-            ->willReturn([1234, 'test']);
+            ->willReturn($this->mockResponse);
 
         $actual = $this->sut->process();
 
@@ -270,27 +212,6 @@ class FormServiceTest extends TestCase
             ->method('getUploadedFiles')
             ->willReturn([]);
 
-        $this->mockServerRequest->expects($this->once())
-            ->method('getUri')
-            ->willReturn($mockUri);
-
-        $mockUri->expects($this->once())
-            ->method('withScheme')
-            ->willReturnSelf();
-
-        $mockUri->expects($this->once())
-            ->method('withPort')
-            ->willReturnSelf();
-
-        $mockUri->expects($this->once())
-            ->method('withPath')
-            ->with('/test')
-            ->willReturnSelf();
-
-        $this->mockResponse->expects($this->once())
-            ->method('withStatus')
-            ->willReturnSelf();
-
         $this->mockFormFactory->expects($this->once())
             ->method('get')
             ->with($this->equalTo($formIdFixture))
@@ -300,14 +221,6 @@ class FormServiceTest extends TestCase
             ->method('canSubmit')
             ->willReturn(false);
 
-        $this->mockForm->expects($this->once())
-            ->method('getPostBackRouteInfo')
-            ->willReturn([307, '/test']);
-
-        $this->mockResponse->expects($this->once())
-            ->method('withHeader')
-            ->withConsecutive($this->equalTo('Location'), $this->equalTo(''))
-            ->willReturnSelf();
 
         $this->mockSession->expects($this->once())
             ->method('setArray')
@@ -329,10 +242,9 @@ class FormServiceTest extends TestCase
      * @uses \Whip\Controllers\Controller::__construct
      * @uses \Whip\Controllers\Controller::redirectTo
      */
-    public function testWillSetPostInSessionBeforeRedirect()
+    public function testWillSetPostInSession()
     {
         $formIdFixture = MockHtmlForm::getId();
-        $routeFixture = [307, __FUNCTION__];
 
         $this->mockServerRequest->expects($this->once())
             ->method('getQueryParams')
@@ -348,32 +260,6 @@ class FormServiceTest extends TestCase
             ->method('get')
             ->with($this->equalTo($formIdFixture))
             ->willReturn($this->mockForm);
-
-        $this->mockForm->expects($this->once())
-            ->method('getPostBackRouteInfo')
-            ->willReturn($routeFixture);
-
-        $mockUri = $this->createMock(UriInterface::class);
-        $mockUri->expects($this->once())
-            ->method('withScheme')
-            ->willReturnSelf();
-        $mockUri->expects($this->once())
-            ->method('withPort')
-            ->willReturnSelf();
-        $mockUri->expects($this->once())
-            ->method('withPath')
-            ->willReturnSelf();
-
-        $this->mockServerRequest->expects($this->once())
-            ->method('getUri')
-            ->willReturn($mockUri);
-
-        $this->mockResponse->expects($this->once())
-            ->method('withStatus')
-            ->willReturnSelf();
-        $this->mockResponse->expects($this->once())
-            ->method('withHeader')
-            ->willReturnSelf();
 
         $this->mockSession->expects($this->once())
             ->method('setArray')

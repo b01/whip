@@ -105,7 +105,7 @@ abstract class FormService extends Controller
      */
     public function process() : ?ResponseInterface
     {
-        $response = null;
+        $response = $this->response;
         $formInput = $this->getScrubbedInput($this->request);
         // Find the submitted form.
         $formId = $this->getSafeArray($this->formSubmitField, $formInput);
@@ -115,11 +115,9 @@ abstract class FormService extends Controller
         if ($form instanceof Form) {
             $form->setInput($formInput);
 
-            $routeInfo = $form->canSubmit() && $form->submit()
-                ? $form->getSubmitRouteInfo()
-                : $form->getPostBackRouteInfo();
-
-            $response = \call_user_func_array([$this, 'redirectTo'], $routeInfo);
+            if ($form->canSubmit()) {
+                $response = $form->submit($response);
+            }
 
             $this->session->setArray(
                 $this->getFormKey($formId),

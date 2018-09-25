@@ -1,5 +1,7 @@
 <?php namespace Whip;
 
+use Psr\Http\Message\ResponseInterface;
+
 /**
  * Class Form
  *
@@ -59,7 +61,7 @@ interface Form
     /**
      * Perform the submission.
      *
-     * @return bool Returns TRUE indicating that the submission was a success, FALSE on failure.
+     * @return Psr\Http\Message\ResponseInterface
      */
-    public function submit() : bool;
+    public function submit(ResponseInterface $response) : ResponseInterface;
 }

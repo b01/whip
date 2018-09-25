@@ -5,6 +5,7 @@
  * this file are reserved by Khalifah Khalil Shabazz
  */
 
+use Psr\Http\Message\ResponseInterface;
 use Whip\Form;
 use Whip\HtmlForm;
 
@@ -77,9 +78,9 @@ class MockHtmlForm extends HtmlForm
     /**
      * @inheritDoc
      */
-    public function submit() : bool
+    public function submit(ResponseInterface $response) : ResponseInterface
     {
-        return '';
+        return $response;
     }
 
     public function proxySetAndGetFailures(string $failure)
