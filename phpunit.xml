@@ -3,10 +3,8 @@
          beStrictAboutTestsThatDoNotTestAnything="true"
          beStrictAboutChangesToGlobalState="true"
          colors="true"
-         coverage-text="true"
          beStrictAboutOutputDuringTests="true"
          forceCoversAnnotation="true"
-         mapTestClassNameToCoveredClassName="true"
          verbose="true">
     <testsuites>
         <testsuite name="All">
@@ -14,9 +12,6 @@
         </testsuite>
     </testsuites>
     <filter>
-        <blacklist>
-            <directory>.</directory>
-        </blacklist>
         <whitelist>
             <directory suffix=".php">src</directory>
         </whitelist>
