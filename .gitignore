@@ -13,6 +13,7 @@
 # Files
 #------
 /composer.lock
+/composer.phar
 /config/settings.php
 /npm-debug.log
 /web-ui/info.php

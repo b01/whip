@@ -1,9 +1,9 @@
-<?php namespace Whip\Controllers;
+<?php namespace Whip;
 
 /**
  * Interface FormValidator
  *
- * @package \Whip\Controllers
+ * @package \Whip
  */
 interface FormValidator
 {

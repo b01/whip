@@ -39,8 +39,8 @@ abstract class TextHtml extends Controller
         ResponseInterface $response,
         FormService $formService
     ) {
-        $this->request = $request;
-        $this->response = $response;
+        parent::__construct($request, $response);
+
         $this->formService = $formService;
         $this->forms = [];
     }
