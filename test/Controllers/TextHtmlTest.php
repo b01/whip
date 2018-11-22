@@ -3,7 +3,6 @@
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\UriInterface;
 use Whip\Controllers\TextHtml;
 use Whip\FormService;
 use Whip\View;

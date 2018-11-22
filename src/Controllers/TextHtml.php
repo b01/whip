@@ -5,7 +5,6 @@
  * specific to a page, then do that in the view.
  */
 
-use Kshabazz\Slib\StringStream;
 use Kshabazz\Slib\Tools\Utilities;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -50,7 +49,7 @@ abstract class TextHtml extends Controller
      *
      * @return \Psr\Http\Message\ResponseInterface
      */
-    public function render(View $view)
+    public function render(View $view) : ResponseInterface
     {
         $get = $this->request->getQueryParams();
         $getVars = $this->cleanArray($get);
@@ -58,6 +57,9 @@ abstract class TextHtml extends Controller
         $post = $this->request->getParsedBody();
         $postVars = \is_array($post) ? $this->cleanArray($post) : [];
 
+//        $userInput = \array_merge($getVars, $postVars);z
+//        $this->formService->process($this->forms, $userInput);
+        $this->formService->process();
         $view->addData('postVars', $postVars);
         $view->addData('queryVars', $getVars);
         $view->addData('forms', $this->formService->getRenderData($this->forms));

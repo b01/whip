@@ -21,6 +21,7 @@
     "license": "MIT",
     "name": "kshabazz/whip",
     "require": {
+        "ext-json": "*",
         "guzzlehttp/guzzle": ">=6.0",
         "kshabazz/slib": ">=2.0",
         "kshabazz/whip-lash": "*",

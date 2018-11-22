@@ -9,6 +9,7 @@ use Kshabazz\Slib\StringStream;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Whip\Session;
+use Whip\View;
 
 /**
  * Class Controller
@@ -28,6 +29,9 @@ abstract class Controller
     /**
      * Html constructor.
      *
+     * TODO: Change to take a renderer
+     * TODO: Change to take a file as a view template.
+     * TODO: Move old params to render method.
      * @param \Psr\Http\Message\ServerRequestInterface $request
      * @param \Psr\Http\Message\ResponseInterface $response
      */
@@ -74,4 +78,12 @@ abstract class Controller
         return $this->response->withStatus($httpStatusCode)
             ->withHeader('Location', (string) $newUri);
     }
+
+    /**
+     * Build a response that will render the view (a.k.a the HTML).
+     *
+     * TODO: Change this to take Request, Response; View is obsolete.
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    abstract public function render(View $view) : ResponseInterface;
 }

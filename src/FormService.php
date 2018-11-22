@@ -77,26 +77,6 @@ abstract class FormService extends Controller
     }
 
     /**
-     * Extract form input from the Request.
-     *
-     * @return array
-     */
-    private function getScrubbedInput(ServerRequestInterface $request) : array
-    {
-        $get = $request->getQueryParams();
-        $getVars = $this->cleanArray($get);
-
-        $post = $request->getParsedBody();
-        $postVars = \is_array($post) ? $this->cleanArray($post) : [];
-
-        $fileVars = $request->getUploadedFiles();
-
-        $requestVars = \array_merge($getVars, $postVars, $fileVars);
-
-        return $requestVars;
-    }
-
-    /**
      * Try to process any form submitted by the client input in the request.
      *
      * @param \Psr\Http\Message\ServerRequestInterface $request
@@ -126,6 +106,26 @@ abstract class FormService extends Controller
         }
 
         return $response;
+    }
+
+    /**
+     * Extract form input from the Request.
+     *
+     * @return array
+     */
+    private function getScrubbedInput(ServerRequestInterface $request) : array
+    {
+        $get = $request->getQueryParams();
+        $getVars = $this->cleanArray($get);
+
+        $post = $request->getParsedBody();
+        $postVars = \is_array($post) ? $this->cleanArray($post) : [];
+
+        $fileVars = $request->getUploadedFiles();
+
+        $requestVars = \array_merge($getVars, $postVars, $fileVars);
+
+        return $requestVars;
     }
 
     /**
