@@ -13,4 +13,13 @@ class Validation
     public function __construct()
     {
     }
+
+    public function addCustomType($type, $callback)
+    {
+
+    }
+
+    public function validate()
+    {
+    }
 }
