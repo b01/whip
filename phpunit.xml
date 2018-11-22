@@ -18,6 +18,7 @@
     </filter>
     <logging>
         <log type="coverage-text" target="php://stdout" showUncoveredFiles="false" />
-        <log type="coverage-clover" target=".phpunit/coverage.xml" />
+        <log type="coverage-clover" target="test-results/phpunit/coverage-clover.xml" />
+        <log type="junit" target="test-results/phpunit/junit.xml" />
     </logging>
 </phpunit>

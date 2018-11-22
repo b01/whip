@@ -6,6 +6,7 @@
 /logs/
 /nbproject/
 /node_modules/
+/test-results/
 /vendor/
 /web-ui/css/
 /web-ui/js/

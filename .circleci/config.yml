@@ -1,18 +1,10 @@
 version: 2
 jobs:
   build:
-    working_directory: /tmp/code
+    working_directory: ~/code
     docker:
-      - image: khalifahks/alpine-php@sha256:e38f5b78fee1d14091d5fbe541ce6ac6e2e15f5d74c9213afc0fbb9953634e5c
+      - image: khalifahks/alpine-php@sha256:e211554c24c84abb621a17ca10a7cfab32ffb0131504a326f7598a2eeef09ec5
     steps:
-      - run:
-          name: Install OS packages.
-          command: |
-            apk --no-progress --no-cache add \
-            curl \
-            openssh \
-            git \
-            php7-tokenizer
       - checkout
       - restore_cache:
           key: v1-deps-{{ checksum "composer.json" }}
@@ -23,7 +15,6 @@ jobs:
       - save_cache:
           key: v1-deps-{{ checksum "composer.json" }}
           paths:
-            - composer.phar
             - vendor
       - run:
           name: 02 - Run Static Code Analysis
@@ -31,3 +22,5 @@ jobs:
       - run:
           name: 03 - Run Unit Test
           command: './vendor/bin/phpunit'
+      - store_test_results:
+          path: test-results
