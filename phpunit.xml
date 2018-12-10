@@ -8,7 +8,7 @@
          verbose="true">
     <testsuites>
         <testsuite name="All">
-            <directory phpVersion="7.0" phpVersionOperator=">=">test</directory>
+            <directory phpVersion="7.2" phpVersionOperator=">=">test</directory>
         </testsuite>
     </testsuites>
     <filter>
@@ -17,8 +17,8 @@
         </whitelist>
     </filter>
     <logging>
-        <log type="coverage-text" target="php://stdout" showUncoveredFiles="false" />
-        <log type="coverage-html" target="test-results/phpunit/report" lowUpperBound="35" highLowerBound="90"/>
+        <log type="coverage-text" target="php://stdout" showUncoveredFiles="true" />
+        <log type="coverage-html" target="test-results/phpunit/report" lowUpperBound="75" highLowerBound="90"/>
         <log type="coverage-clover" target="test-results/phpunit/coverage-clover.xml" />
         <log type="junit" target="test-results/phpunit/junit.xml" />
     </logging>

@@ -40,8 +40,6 @@ final class TextHtmlTest extends TestCase
         $this->sut = $this->getMockForAbstractClass(
             TextHtml::class,
             [
-                $this->mockRequest,
-                $this->mockResponse,
                 $this->mockFormService,
             ]
         );
@@ -56,7 +54,7 @@ final class TextHtmlTest extends TestCase
     }
 
     /**
-     * @covers ::render
+     * @covers ::__invoke
      * @uses \Whip\Controllers\TextHtml::__construct
      */
     public function testCanRender()
@@ -78,19 +76,28 @@ final class TextHtmlTest extends TestCase
 
         $this->mockResponse->expects($this->once())
             ->method('withBody')
+            ->willReturnSelf();
+
+        $this->mockFormService->expects($this->once())
+            ->method('process')
             ->willReturn($this->mockResponse);
 
         $this->mockFormService->expects($this->once())
-            ->method('getRenderData')
+            ->method('getData')
             ->willReturn([]);
 
-        $actual = $this->sut->render($this->mockView);
+        $actual = $this->sut->__invoke(
+            $this->mockRequest,
+            $this->mockResponse,
+            $this->mockView,
+            []
+        );
 
         $this->assertEquals($this->mockResponse, $actual);
     }
 
     /**
-     * @covers ::render
+     * @covers ::__invoke
      * @uses \Whip\Controllers\TextHtml::__construct
      */
     public function testWillCleanQueryParamsBeforeAddingToAView()
@@ -124,14 +131,23 @@ final class TextHtmlTest extends TestCase
             ->willReturn($this->mockResponse);
 
         $this->mockFormService->expects($this->once())
-            ->method('getRenderData')
+            ->method('process')
+            ->willReturn($this->mockResponse);
+
+        $this->mockFormService->expects($this->once())
+            ->method('getData')
             ->willReturn([]);
 
-        $this->sut->render($this->mockView);
+        $this->sut->__invoke(
+            $this->mockRequest,
+            $this->mockResponse,
+            $this->mockView,
+            []
+        );
     }
 
     /**
-     * @covers ::render
+     * @covers ::__invoke
      * @uses \Whip\Controllers\TextHtml::__construct
      */
     public function testWillCleanPostParamsBeforeAddingToAView()
@@ -163,41 +179,18 @@ final class TextHtmlTest extends TestCase
             ->willReturn($this->mockResponse);
 
         $this->mockFormService->expects($this->once())
-            ->method('getRenderData')
-            ->willReturn([]);
-
-        $this->sut->render($this->mockView);
-    }
-
-    /**
-     * @covers ::withForms
-     * @uses \Whip\Controllers\TextHtml::__construct
-     * @uses \Whip\Controllers\TextHtml::render
-     */
-    public function testCanAddForms()
-    {
-        $this->mockRequest->expects($this->once())
-            ->method('getParsedBody')
-            ->willReturn(['test'=> '1234<>']);
-
-        $this->mockRequest->expects($this->once())
-            ->method('getQueryParams')
-            ->willReturn([]);
-
-        $this->mockView->expects($this->any())
-            ->method('addData')
-            ->willReturnSelf();
-
-        $this->mockResponse->expects($this->once())
-            ->method('withBody')
+            ->method('process')
             ->willReturn($this->mockResponse);
 
-        $fixture = ['testForm'];
         $this->mockFormService->expects($this->once())
-            ->method('getRenderData')
-            ->with($this->equalTo($fixture));
+            ->method('getData')
+            ->willReturn([]);
 
-        $this->sut->withForms($fixture)
-            ->render($this->mockView);
+        $this->sut->__invoke(
+            $this->mockRequest,
+            $this->mockResponse,
+            $this->mockView,
+            []
+        );
     }
 }

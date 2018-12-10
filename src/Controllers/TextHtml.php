@@ -10,6 +10,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Whip\FormService;
 use Whip\View;
+use Whip\WhipException;
 
 /**
  * Class Html Render HTML response for
@@ -19,9 +20,6 @@ use Whip\View;
 abstract class TextHtml extends Controller
 {
     use Utilities;
-
-    /** @var array A list of form models to pass to the render engine. */
-    protected $forms;
 
     /** @var \Whip\FormService */
     protected $formService;
@@ -33,59 +31,41 @@ abstract class TextHtml extends Controller
      * @param \Psr\Http\Message\ResponseInterface $response
      * @param \Whip\FormService $formService
      */
-    public function __construct(
-        ServerRequestInterface $request,
-        ResponseInterface $response,
-        FormService $formService
-    ) {
-        parent::__construct($request, $response);
-
+    public function __construct(FormService $formService)
+    {
         $this->formService = $formService;
-        $this->forms = [];
     }
 
     /**
      * Build a response that will render the view (a.k.a the HTML).
      *
      * @return \Psr\Http\Message\ResponseInterface
+     * @throws WhipException
      */
-    public function render(View $view) : ResponseInterface
-    {
-        $get = $this->request->getQueryParams();
+    public function __invoke(
+        ServerRequestInterface $request,
+        ResponseInterface $response,
+        View $view,
+        array $forms
+    ) : ResponseInterface {
+        $get = $request->getQueryParams();
         $getVars = $this->cleanArray($get);
 
-        $post = $this->request->getParsedBody();
+        $post = $request->getParsedBody();
         $postVars = \is_array($post) ? $this->cleanArray($post) : [];
 
-//        $userInput = \array_merge($getVars, $postVars);z
-//        $this->formService->process($this->forms, $userInput);
-        $this->formService->process();
+        $response = $this->formService->process($request, $response, $forms);
+
         $view->addData('postVars', $postVars);
         $view->addData('queryVars', $getVars);
-        $view->addData('forms', $this->formService->getRenderData($this->forms));
+        $view->addData('forms', $this->formService->getData());
 
         $html = $view->render();
 
         $output = $this->getHttpMessageBody($html);
 
-        $this->response = $this->response->withBody($output);
+        $response = $response->withBody($output);
 
-        return $this->response;
-    }
-
-    /**
-     * Add a list of form models you want to pass to the render engine.
-     *
-     * Adding forms here will pass them allong to the render engine. Allowing form values, error messages, etc to be
-     * shown in the response.
-     *
-     * @param array $forms
-     * @return \Whip\Controllers\TextHtml
-     */
-    public function withForms(array $forms)
-    {
-        $this->forms = $forms;
-
-        return $this;
+        return $response;
     }
 }

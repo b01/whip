@@ -4,160 +4,155 @@ use Kshabazz\Slib\Tools\Utilities;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Whip\Controllers\Controller;
+use Whip\Lash\Validator;
 
 /**
  * Class FormService
  *
  * @package \Whip
  */
-abstract class FormService extends Controller
+class FormService extends Controller
 {
+    use Tools;
     use Utilities;
 
-    /** @var \Whip\FormFactory */
-    protected $factory;
+    /** @var \Whip\SessionWrapper */
+    protected $session;
 
-    /** @var array List of \Whip\Form objects (keys are the form IDs). */
-    protected $forms;
+    /** @var array Data for a processed form. */
+    protected $data;
 
-    /** @var string Form ID to indicate which form has posted. */
-    protected $formSubmitField;
-
-    /** @var string Key prefix for form render data stored in the session. */
-    protected $sessionRenderDataKey;
+    /** @var \Whip\Lash\Validation */
+    private $validation;
 
     /**
      * FormService constructor.
      *
-     * @param ServerRequestInterface $request
-     * @param ResponseInterface $response
-     * @param string $formSubmitField
-     * @param FormFactory $factory
-     * @param SessionWrapper $session
+     * @param \Whip\Lash\Validation $validation
+     * @param \Whip\SessionWrapper $session
      */
     public function __construct(
-        ServerRequestInterface $request,
-        ResponseInterface $response,
-        string $formSubmitField,
-        FormFactory $factory,
+        Validator $validation,
         SessionWrapper $session
     ) {
-        parent::__construct($request, $response);
-
-        $this->formSubmitField = $formSubmitField;
-        $this->factory = $factory;
-        $this->forms = [];
-        $this->sessionRenderDataKey = __CLASS__ . ':renderData';
+        $this->validation = $validation;
         $this->session = $session;
+        $this->data = [];
     }
 
     /**
-     * Get data to fill in placeholders.
-     *
      * @return array
      */
-    public function getRenderData(array $formNames) : array
+    public function getData()
     {
-        $formData = [];
-
-        foreach ($formNames as $formId) {
-            $sessionKey = $this->getFormKey($formId);
-            $sessionData = $this->session->getArray($sessionKey, null);
-            $noSessionData = empty($sessionData);
-
-            if ($noSessionData) {
-                $form = $this->factory->get($formId);
-                $formData[$formId] = $form->getRenderData();
-            } else {
-                $formData[$formId] = $sessionData;
-            }
-        }
-
-        return $formData;
+        return $this->data;
     }
 
     /**
      * Try to process any form submitted by the client input in the request.
      *
      * @param \Psr\Http\Message\ServerRequestInterface $request
-     * @return \Psr\Http\Message\ResponseInterface|null
-     * @exception When the form key is found, but the form was not.
+     * @return \Psr\Http\Message\ResponseInterface
+     * @throws \Whip\WhipException
      */
-    public function process() : ?ResponseInterface
-    {
-        $response = $this->response;
-        $formInput = $this->getScrubbedInput($this->request);
-        // Find the submitted form.
-        $formId = $this->getSafeArray($this->formSubmitField, $formInput);
-        $form = $this->getForm($formId);
+    public function process(
+        ServerRequestInterface $request,
+        ResponseInterface $response,
+        array $forms
+    ) : ResponseInterface {
+        $input = $this->getScrubbedInput($request);
+
+        // This looks for the form ID in the input array.
+        $form = $this->findForm($forms, $input, $this->data);
 
         // Process the form.
         if ($form instanceof Form) {
-            $form->setInput($formInput);
+            $formId = $form->getId();
+            $formRules = $form->getRules();
+            $formInput = $input[$formId]; // keep only the form input.
+            $input = null; // we don't need this variable anymore.
 
-            if ($form->canSubmit()) {
-                $response = $form->submit($response);
+            // A form with no input probably means testing is being done.
+            if (\count($formInput) === 0) {
+                throw new WhipException(WhipException::FORM_WITH_NO_INPUT, [$formId]);
             }
 
-            $this->session->setArray(
-                $this->getFormKey($formId),
-                $form->getRenderData()
-            );
+            // A form with no rules probably means a new form is being built and someone forgot
+            // to add some rules to validate its input.
+            if (\count($formRules) === 0) {
+                throw new WhipException(WhipException::FORM_WITH_NO_RULES, [$formId]);
+            }
+
+            // Add validation rules.
+            try {
+                $this->validation->addRules($formRules);
+            } catch (\Exception $err) {
+                throw new WhipException(
+                    WhipException::COULD_NOT_ADD_FORM_RULES,
+                    [$formId, $err->getMessage()]
+                );
+            }
+
+            // Validate the form
+            try {
+                $isValid = $this->validation->validate(
+                    $formInput
+                );
+            } catch (\Exception $err) {
+                throw new WhipException(
+                    WhipException::FORM_VALIDATE_ERR,
+                    [$formId, $err->getMessage()]
+                );
+            }
+
+            $this->data[$formId] = [
+                'id' => $formId, // yes redundant, but more for the template engine.
+                'errors' => $this->validation->getErrors(),
+                'input' => $formInput,
+                'isValid' => $isValid
+            ];
+
+            // Overwrites previous session data without consideration.
+            $this->session->setArray($formId, $this->data);
+
+            if ($isValid === true) {
+                $response = $form->submit($response, $formInput);
+            }
         }
 
         return $response;
     }
 
     /**
-     * Extract form input from the Request.
-     *
-     * @return array
-     */
-    private function getScrubbedInput(ServerRequestInterface $request) : array
-    {
-        $get = $request->getQueryParams();
-        $getVars = $this->cleanArray($get);
-
-        $post = $request->getParsedBody();
-        $postVars = \is_array($post) ? $this->cleanArray($post) : [];
-
-        $fileVars = $request->getUploadedFiles();
-
-        $requestVars = \array_merge($getVars, $postVars, $fileVars);
-
-        return $requestVars;
-    }
-
-    /**
      * Find and instantiate a form indicated in a request.
      *
-     * @param string $formId
-     * @return null|Form
+     * @param array $forms
+     * @return null|\Whip\Form
      * @throws WhipException
      */
-    private function getForm(string $formId) : ?Form
+    private function findForm(array $forms, array $input, array & $data) : ?Form
     {
-        $form = $this->factory->get($formId);
+        $rV = null;
 
-        // Form key was found but no form.
-        if (!empty($formId) && empty($form)) {
-            throw new WhipException(
-                WhipException::FORM_NOT_FOUND,
-                [$this->formSubmitField]
-            );
+        // Loop through forms, if their ID is present in the input
+        // then return that form. Only the first form found will be
+        // processed.
+        foreach ($forms as $i => $form) {
+            if (!$form instanceof Form) {
+                throw new WhipException(
+                    WhipException::NOT_A_FORM, [$i, Form::class]
+                );
+            }
+
+            $name = $form->getId();
+            $data[$name] = ['id' => $name];
+
+            if (\array_key_exists($name, $input)) {
+                $rV = $form;
+//                break;
+            }
         }
 
-        return $form;
-    }
-
-    /**
-     * Get a form render data session key.
-     *
-     * @param string $formId
-     * @return string
-     */
-    private function getFormKey(string $formId) : string
-    {
-        return "{$this->sessionRenderDataKey}:{$formId}";
+        return $rV;
     }
 }

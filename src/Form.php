@@ -14,54 +14,18 @@ interface Form
      *
      * @return mixed
      */
-    public static function getId() : string;
+    public function getId() : string;
 
     /**
-     * Perform any checks that determine if the form can be submitted.
-     *
-     * @return bool
-     */
-    public function canSubmit() : bool;
-
-    /**
-     * Get failure reasons.
-     *
-     * @return array A list of reason why form submission failed.
-     */
-    public function getFailures() : array;
-
-    /**
-     * Get route and http status code to redirect to when submission fails.
-     *
-     * @return array An array containing the http status code at index 0, and the route at index 1.
-     */
-    public function getPostBackRouteInfo() : array;
-
-    /**
-     * Get data to pass to the template engine to aid rendering. For example, field value and errors.
-     *
+     * Get validation rules.
      * @return array
      */
-    public function getRenderData() : array;
+    public function getRules() : array;
 
     /**
-     * Get the route to redirect to when submission is a success.
-     *
-     * @return string
+     * @param \Psr\Http\Message\ResponseInterface $response
+     * @param array $input
+     * @return \Psr\Http\Message\ResponseInterface
      */
-    public function getSubmitRouteInfo() : array;
-
-    /**
-     * Clean the request variables by filtering each field, at least, through htmlspecialchars.
-     *
-     * @param array $requestVars
-     */
-    public function setInput(array $requestVars) : Form;
-
-    /**
-     * Perform the submission.
-     *
-     * @return Psr\Http\Message\ResponseInterface
-     */
-    public function submit(ResponseInterface $response) : ResponseInterface;
+    public function submit(ResponseInterface $response, array $input) : ResponseInterface;
 }

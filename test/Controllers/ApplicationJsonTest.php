@@ -39,21 +39,7 @@ class ApplicationJsonTest extends TestCase
     }
 
     /**
-     * @covers ::__construct
-     */
-    public function testCanInitialize()
-    {
-        $this->sut = new ApplicationJson(
-            $this->mockRequest,
-            $this->mockResponse
-        );
-
-        $this->assertInstanceOf(Controller::class, $this->sut);
-    }
-
-    /**
-     * @covers ::render
-     * @uses \Whip\Controllers\ApplicationJson::__construct
+     * @covers ::__invoke
      */
     public function testCanPerformARedirect()
     {
@@ -73,12 +59,13 @@ class ApplicationJsonTest extends TestCase
             ->method('render')
             ->willReturn($encodeFixture);
 
-        $this->sut = new ApplicationJson(
-            $this->mockRequest,
-            $this->mockResponse
-        );
+        $this->sut = new ApplicationJson();
 
-        $actual = $this->sut->render($this->mockView);
+        $actual = $this->sut->__invoke(
+            $this->mockRequest,
+            $this->mockResponse,
+            $this->mockView
+        );
 
         $this->assertEquals($this->mockResponse, $actual);
     }

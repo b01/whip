@@ -19,21 +19,16 @@ class ApplicationJson extends Controller
     /**
      * @inheritdoc
      */
-    public function __construct(ServerRequestInterface $request, ResponseInterface $response)
-    {
-        parent::__construct($request, $response);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function render(View $view): ResponseInterface
-    {
+    public function __invoke(
+        ServerRequestInterface $request,
+        ResponseInterface $response,
+        View $view
+    ): ResponseInterface {
         $json = $view->render();
 
         $output = $this->getHttpMessageBody($json);
 
-        return $this->response->withBody($output)
+        return $response->withBody($output)
             ->withHeader('Content-Type', 'application/json');
     }
 }

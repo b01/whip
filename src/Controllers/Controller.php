@@ -8,8 +8,6 @@
 use Kshabazz\Slib\StringStream;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Whip\Session;
-use Whip\View;
 
 /**
  * Class Controller
@@ -18,31 +16,6 @@ use Whip\View;
  */
 abstract class Controller
 {
-    use Session;
-
-    /** @var \Psr\Http\Message\ServerRequestInterface */
-    protected $request;
-
-    /** @var \Psr\Http\Message\ResponseInterface */
-    protected $response;
-
-    /**
-     * Html constructor.
-     *
-     * TODO: Change to take a renderer
-     * TODO: Change to take a file as a view template.
-     * TODO: Move old params to render method.
-     * @param \Psr\Http\Message\ServerRequestInterface $request
-     * @param \Psr\Http\Message\ResponseInterface $response
-     */
-    public function __construct(
-        ServerRequestInterface $request,
-        ResponseInterface $response
-    ) {
-        $this->request = $request;
-        $this->response = $response;
-    }
-
     /**
      * @param string $body
      * @return \Kshabazz\Slib\StringStream
@@ -57,16 +30,28 @@ abstract class Controller
      *
      * @param \Psr\Http\Message\UriInterface $url
      * @param int $httpStatusCode
-     * @return \Psr\Http\Message\ResponseInterface;
+     * @return \ResponseInterface;
+     */
+    /**
+     * @param \Psr\Http\MessageServerRequestInterface $request
+     * @param \Psr\Http\MessageResponseInterface $response
+     * @param int $httpStatusCode
+     * @param string $route
+     * @param array|null $query
+     * @param string $httpProtocol
+     * @param int $httpPort
+     * @return \Psr\Http\MessageResponseInterface
      */
     public function redirectTo(
+        ServerRequestInterface $request,
+        ResponseInterface $response,
         int $httpStatusCode,
         string $route,
         array $query = null,
         string $httpProtocol = 'https',
         int $httpPort = 443
-    ) {
-        $uri = $this->request->getUri();
+    ) : ResponseInterface {
+        $uri = $request->getUri();
         $newUri = $uri->withScheme($httpProtocol)
             ->withPort($httpPort)
             ->withPath($route);
@@ -75,15 +60,7 @@ abstract class Controller
             $newUri = $newUri->withQuery(\http_build_query($query));
         }
 
-        return $this->response->withStatus($httpStatusCode)
+        return $response->withStatus($httpStatusCode)
             ->withHeader('Location', (string) $newUri);
     }
-
-    /**
-     * Build a response that will render the view (a.k.a the HTML).
-     *
-     * TODO: Change this to take Request, Response; View is obsolete.
-     * @return \Psr\Http\Message\ResponseInterface
-     */
-    abstract public function render(View $view) : ResponseInterface;
 }

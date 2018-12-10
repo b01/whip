@@ -36,24 +36,12 @@ class ControllerTest extends TestCase
 
         $this->sut = $this->getMockForAbstractClass(
             Controller::class,
-            [
-                $this->mockRequest,
-                $this->mockResponse
-            ]
+            []
         );
     }
 
     /**
-     * @covers ::__construct
-     */
-    public function testCanInitialize()
-    {
-        $this->assertInstanceOf(Controller::class, $this->sut);
-    }
-
-    /**
      * @covers ::redirectTo
-     * @uses \Whip\Controllers\Controller::__construct
      */
     public function testCanPerformARedirect()
     {
@@ -91,7 +79,12 @@ class ControllerTest extends TestCase
             ->method('getUri')
             ->willReturn($mockUri);
 
-        $actual = $this->sut->redirectTo(302, '/test');
+        $actual = $this->sut->redirectTo(
+            $this->mockRequest,
+            $this->mockResponse,
+            302,
+            '/test'
+        );
 
         $this->assertEquals($this->mockResponse, $actual);
     }
@@ -135,6 +128,16 @@ class ControllerTest extends TestCase
             ->method('withStatus')
             ->willReturnSelf();
 
-        $this->sut->redirectTo(-1, '2fdafa', $fixture);
+        $this->mockResponse->expects($this->once())
+            ->method('withHeader')
+            ->willReturnSelf();
+
+        $this->sut->redirectTo(
+            $this->mockRequest,
+            $this->mockResponse,
+            -1,
+            '2fdafa',
+            $fixture
+        );
     }
 }
